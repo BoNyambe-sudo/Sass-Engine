@@ -117,7 +117,7 @@
             </section>
             @if (overview(); as data) {
               <section class="metric-grid" aria-label="Growth metrics">
-                <article class="metric-card"><div class="metric-top"><span>Monthly recurring revenue</span><span class="metric-icon violet">$</span></div><strong class="metric-value">{{ formatMoney(data.mrr) }}</strong><span class="metric-foot">Current active subscriptions</span></article>
+                <article class="metric-card"><div class="metric-top"><span>Monthly recurring revenue</span><span class="metric-icon violet">$</span></div><strong class="metric-value" [class.multi-currency]="data.mrr === null">{{ data.mrr === null ? 'Mixed currencies' : formatMoney(data.mrr, data.mrrCurrency) }}</strong><span class="metric-foot">Current active subscriptions</span></article>
                 <article class="metric-card"><div class="metric-top"><span>Active subscriptions</span><span class="metric-icon blue">↗</span></div><strong class="metric-value">{{ data.activeSubscriptions | number }}</strong><span class="metric-foot">Across your workspace</span></article>
                 <article class="metric-card"><div class="metric-top"><span>Churn rate</span><span class="metric-icon amber">↘</span></div><strong class="metric-value">{{ data.churn }}<small>%</small></strong><span class="metric-foot">In the last 30 days</span></article>
                 <article class="metric-card"><div class="metric-top"><span>New members</span><span class="metric-icon green">＋</span></div><strong class="metric-value">{{ data.newUsers | number }}</strong><span class="metric-foot">Joined in the last 30 days</span></article>
@@ -179,7 +179,7 @@
 
           @if (activeSection() === 'billing') {
             <section class="page-heading"><div><span class="eyebrow">SUBSCRIPTION & PAYMENTS</span><h1>Billing</h1><p>Manage your plan and keep your workspace running.</p></div></section>
-            <section class="panel current-plan"><div class="plan-intro"><span class="current-plan-icon">◈</span><span><span class="eyebrow">CURRENT PLAN</span><h2>{{ subscription()?.plan | titlecase }}</h2><p>Your subscription is {{ subscription()?.status ?? 'inactive' }}.</p></span></div><div class="plan-value"><strong>{{ formatMoney((subscription()?.amountCents ?? 0) / 100) }}<small>/ month</small></strong>@if (subscription()?.currentPeriodEnd) { <span>Renews {{ formatDate(subscription()?.currentPeriodEnd!) }}</span> }</div><button class="button button-outline" (click)="openBillingPortal()">Manage subscription <span aria-hidden="true">↗</span></button></section>
+            <section class="panel current-plan"><div class="plan-intro"><span class="current-plan-icon">◈</span><span><span class="eyebrow">CURRENT PLAN</span><h2>{{ subscription()?.plan | titlecase }}</h2><p>Your subscription is {{ subscription()?.status ?? 'inactive' }}.</p></span></div><div class="plan-value"><strong>{{ formatMoney((subscription()?.amountCents ?? 0) / 100, subscription()?.currency) }}<small>/ month</small></strong>@if (subscription()?.currentPeriodEnd) { <span>Renews {{ formatDate(subscription()?.currentPeriodEnd!) }}</span> }</div><button class="button button-outline" (click)="openBillingPortal()">Manage subscription <span aria-hidden="true">↗</span></button></section>
             <div class="section-title"><div><h2>Choose a plan</h2><p>All plans are securely managed through Stripe.</p></div></div>
             <section class="plan-grid">
               @for (plan of plans(); track plan.key) {
@@ -202,8 +202,8 @@
             <section class="panel account-panel"><div><h2>Your account</h2><p>{{ session()?.user.email }}</p></div><button class="button button-outline" (click)="signOut()">Sign out</button></section>
           }
           <footer class="page-footer"><span>© 2026 Northstar</span><span><a href="#privacy">Privacy</a><a href="#terms">Terms</a><span class="footer-version">Made for clear decisions</span></span></footer>
-        </div>
+        </main>
       </section>
     </div>
   }
-</main>
+</div>

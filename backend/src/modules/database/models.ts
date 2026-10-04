@@ -1,8 +1,4 @@
-import {
-  Document,
-  Schema,
-  Types,
-} from 'mongoose';
+import { Document, Schema, Types } from 'mongoose';
 
 export type Role = 'ADMIN' | 'MANAGER' | 'VIEWER';
 
@@ -144,7 +140,11 @@ refreshSessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 const oneTimeTokenSchema = new Schema<OneTimeToken>({
   userId: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
   tokenHash: { type: String, required: true, unique: true, select: false },
-  type: { type: String, enum: ['verify-email', 'reset-password'], required: true },
+  type: {
+    type: String,
+    enum: ['verify-email', 'reset-password'],
+    required: true,
+  },
   expiresAt: { type: Date, required: true },
   consumedAt: { type: Date, default: null },
 });
@@ -181,8 +181,18 @@ const subscriptionSchema = new Schema<Subscription>(
       unique: true,
       ref: 'Organization',
     },
-    stripeCustomerId: { type: String, default: null, index: true, sparse: true },
-    stripeSubscriptionId: { type: String, default: null, index: true, sparse: true },
+    stripeCustomerId: {
+      type: String,
+      default: null,
+      index: true,
+      sparse: true,
+    },
+    stripeSubscriptionId: {
+      type: String,
+      default: null,
+      index: true,
+      sparse: true,
+    },
     plan: { type: String, default: 'free' },
     status: { type: String, default: 'inactive' },
     amountCents: { type: Number, default: 0, min: 0 },
@@ -215,7 +225,11 @@ const stripeEventSchema = new Schema<StripeEvent>({
   eventId: { type: String, required: true, unique: true },
   type: { type: String, required: true },
   processedAt: { type: Date, default: Date.now },
-  status: { type: String, enum: ['processing', 'processed'], default: 'processing' },
+  status: {
+    type: String,
+    enum: ['processing', 'processed'],
+    default: 'processing',
+  },
   lockedUntil: { type: Date, default: Date.now },
 });
 

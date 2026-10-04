@@ -5,6 +5,7 @@ import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { AccessTokenGuard, RolesGuard } from './auth.context.js';
 import { EmailModule } from '../email/email.module.js';
+import { AccessTokenExpiry } from '../../config/environment.js';
 
 @Global()
 @Module({
@@ -16,7 +17,9 @@ import { EmailModule } from '../email/email.module.js';
       global: true,
       useFactory: (config: ConfigService) => ({
         secret: config.getOrThrow<string>('JWT_SECRET'),
-        signOptions: { expiresIn: config.get<string>('JWT_EXPIRY', '15m') },
+        signOptions: {
+          expiresIn: config.getOrThrow<AccessTokenExpiry>('JWT_EXPIRY'),
+        },
       }),
     }),
   ],

@@ -18,16 +18,21 @@ import {
 import { Types } from 'mongoose';
 import {
   AccessTokenGuard,
-  AuthContext,
   CurrentAuth,
   Roles,
   RolesGuard,
 } from '../auth/auth.context.js';
+import type { AuthContext } from '../auth/auth.context.js';
 import { AuthService } from '../auth/auth.service.js';
 import { ChangeRoleDto, InviteDto } from '../auth/auth.dto.js';
 import { AuditService } from '../audit/audit.service.js';
 import { DatabaseService } from '../database/database.service.js';
-import { Invitation, Membership, Organization, User } from '../database/models.js';
+import {
+  Invitation,
+  Membership,
+  Organization,
+  User,
+} from '../database/models.js';
 
 @Controller('users')
 @UseGuards(AccessTokenGuard, RolesGuard)
@@ -62,7 +67,9 @@ export class UsersController {
       .find({ _id: { $in: memberships.map((member) => member.userId) } })
       .select('name email createdAt')
       .lean();
-    const userById = new Map(users.map((user) => [user._id.toString(), user]));
+    const userById = new Map(
+      users.map((user) => [user._id.toString(), user] as const),
+    );
     return {
       items: memberships
         .map((member) => {
@@ -118,14 +125,16 @@ export class UsersController {
       .select('email role');
     if (!invitation) throw new NotFoundException('Invitation not found');
     if (auth.role === 'MANAGER' && invitation.role !== 'VIEWER') {
-      throw new ForbiddenException('Managers may only revoke viewer invitations');
+      throw new ForbiddenException(
+        'Managers may only revoke viewer invitations',
+      );
     }
     const revoked = await invitations.findOneAndDelete({
-        _id: invitationId,
-        organizationId: auth.organizationId,
-        acceptedAt: null,
-        ...(auth.role === 'MANAGER' ? { role: 'VIEWER' } : {}),
-      });
+      _id: invitationId,
+      organizationId: auth.organizationId,
+      acceptedAt: null,
+      ...(auth.role === 'MANAGER' ? { role: 'VIEWER' } : {}),
+    });
     if (!revoked) throw new NotFoundException('Invitation not found');
     await this.audit.record({
       organizationId: auth.organizationId,
@@ -174,7 +183,9 @@ export class UsersController {
         .getModel<Membership>('Membership')
         .countDocuments({ organizationId: auth.organizationId, role: 'ADMIN' });
       if (admins <= 1) {
-        throw new ConflictException('An organization must retain at least one admin');
+        throw new ConflictException(
+          'An organization must retain at least one admin',
+        );
       }
     }
     membership.role = dto.role;
@@ -203,7 +214,9 @@ export class UsersController {
         .getModel<Membership>('Membership')
         .countDocuments({ organizationId: auth.organizationId, role: 'ADMIN' });
       if (admins <= 1) {
-        throw new ConflictException('An organization must retain at least one admin');
+        throw new ConflictException(
+          'An organization must retain at least one admin',
+        );
       }
     }
     await membership.deleteOne();

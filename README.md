@@ -32,6 +32,7 @@ client is an Angular 22 standalone application.
    The Angular development server proxies `/api` requests to
    `http://localhost:3000`. The API health endpoint is `/api/health` and the
    Swagger UI is `/api/docs`.
+
 4. MongoDB collections and indexes are created from the Mongoose schemas at
    startup. Production disables automatic index creation; apply the indexes
    declared in `backend/src/modules/database/models.ts` through your MongoDB

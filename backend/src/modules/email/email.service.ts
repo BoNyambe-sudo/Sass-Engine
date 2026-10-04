@@ -1,10 +1,18 @@
-import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
 
-  async sendVerification(email: string, name: string, token: string): Promise<void> {
+  async sendVerification(
+    email: string,
+    name: string,
+    token: string,
+  ): Promise<void> {
     await this.send(
       email,
       'Verify your Northstar email',
@@ -13,7 +21,11 @@ export class EmailService {
     );
   }
 
-  async sendPasswordReset(email: string, name: string, token: string): Promise<void> {
+  async sendPasswordReset(
+    email: string,
+    name: string,
+    token: string,
+  ): Promise<void> {
     await this.send(
       email,
       'Reset your Northstar password',
@@ -38,7 +50,9 @@ export class EmailService {
     developmentToken: string,
   ): Promise<void> {
     if (process.env.NODE_ENV !== 'production') {
-      this.logger.log(`Development-only email to ${recipient}: ${text} [token: ${developmentToken}]`);
+      this.logger.log(
+        `Development-only email to ${recipient}: ${text} [token: ${developmentToken}]`,
+      );
       return;
     }
     const apiKey = process.env.RESEND_API_KEY;
@@ -58,7 +72,9 @@ export class EmailService {
       signal: AbortSignal.timeout(10_000),
     });
     if (!response.ok) {
-      this.logger.error(`Email provider rejected delivery (${response.status})`);
+      this.logger.error(
+        `Email provider rejected delivery (${response.status})`,
+      );
       throw new ServiceUnavailableException('Unable to deliver account email');
     }
   }

@@ -14,10 +14,9 @@ describe('BillingService webhooks', () => {
 
   it('rejects invalid webhook signatures', async () => {
     const database = { getModel: vi.fn() } as unknown as DatabaseService;
-    const service = new BillingService(
-      database,
-      { record: vi.fn() } as unknown as AuditService,
-    );
+    const service = new BillingService(database, {
+      record: vi.fn(),
+    } as unknown as AuditService);
 
     await expect(
       service.handleWebhook(Buffer.from('{}'), 'invalid-signature'),
@@ -42,21 +41,28 @@ describe('BillingService webhooks', () => {
       secret: process.env.STRIPE_WEBHOOK_SECRET!,
     });
     const events = {
-      create: vi.fn().mockRejectedValue(Object.assign(new Error('duplicate'), { code: 11000 })),
+      create: vi
+        .fn()
+        .mockRejectedValue(
+          Object.assign(new Error('duplicate'), { code: 11000 }),
+        ),
       findOne: vi.fn().mockResolvedValue({ status: 'processed' }),
     };
     const database = {
       getModel: vi.fn(() => events),
     } as unknown as DatabaseService;
-    const service = new BillingService(
-      database,
-      { record: vi.fn() } as unknown as AuditService,
-    );
+    const service = new BillingService(database, {
+      record: vi.fn(),
+    } as unknown as AuditService);
 
-    await expect(service.handleWebhook(Buffer.from(payload), signature)).resolves.toEqual({
+    await expect(
+      service.handleWebhook(Buffer.from(payload), signature),
+    ).resolves.toEqual({
       received: true,
       duplicate: true,
     });
-    expect(events.findOne).toHaveBeenCalledWith({ eventId: 'evt_already_processed' });
+    expect(events.findOne).toHaveBeenCalledWith({
+      eventId: 'evt_already_processed',
+    });
   });
 });

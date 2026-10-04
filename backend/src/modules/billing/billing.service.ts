@@ -16,9 +16,21 @@ import {
 import { AuditService } from '../audit/audit.service.js';
 
 const planDetails = [
-  { key: 'starter', name: 'Starter', features: ['Core analytics', 'Up to 5 seats'] },
-  { key: 'growth', name: 'Growth', features: ['Advanced analytics', 'Up to 25 seats'] },
-  { key: 'scale', name: 'Scale', features: ['Custom reporting', 'Unlimited seats'] },
+  {
+    key: 'starter',
+    name: 'Starter',
+    features: ['Core analytics', 'Up to 5 seats'],
+  },
+  {
+    key: 'growth',
+    name: 'Growth',
+    features: ['Advanced analytics', 'Up to 25 seats'],
+  },
+  {
+    key: 'scale',
+    name: 'Scale',
+    features: ['Custom reporting', 'Unlimited seats'],
+  },
 ] as const;
 
 @Injectable()
@@ -60,7 +72,9 @@ export class BillingService {
     const stripe = this.getStripe();
     const price = process.env[`STRIPE_PRICE_${plan.toUpperCase()}`];
     if (!price) {
-      throw new ServiceUnavailableException(`Stripe price for ${plan} is not configured`);
+      throw new ServiceUnavailableException(
+        `Stripe price for ${plan} is not configured`,
+      );
     }
     const successUrl = this.requiredUrl('STRIPE_CHECKOUT_SUCCESS_URL');
     const cancelUrl = this.requiredUrl('STRIPE_CHECKOUT_CANCEL_URL');
@@ -75,7 +89,9 @@ export class BillingService {
     }
     let customerId = subscription.stripeCustomerId;
     if (!customerId) {
-      const owner = await this.database.getModel<User>('User').findById(organization.ownerId);
+      const owner = await this.database
+        .getModel<User>('User')
+        .findById(organization.ownerId);
       const customer = await stripe.customers.create({
         name: organization.name,
         ...(owner ? { email: owner.email } : {}),
@@ -96,7 +112,10 @@ export class BillingService {
       subscription_data: { metadata: { organizationId, plan } },
       allow_promotion_codes: true,
     });
-    if (!checkout.url) throw new ServiceUnavailableException('Stripe did not return a checkout URL');
+    if (!checkout.url)
+      throw new ServiceUnavailableException(
+        'Stripe did not return a checkout URL',
+      );
     return { url: checkout.url };
   }
 
@@ -106,7 +125,9 @@ export class BillingService {
       .getModel<Subscription>('Subscription')
       .findOne({ organizationId });
     if (!subscription?.stripeCustomerId) {
-      throw new NotFoundException('No billing customer is set up for this organization');
+      throw new NotFoundException(
+        'No billing customer is set up for this organization',
+      );
     }
     const portal = await stripe.billingPortal.sessions.create({
       customer: subscription.stripeCustomerId,
@@ -117,7 +138,10 @@ export class BillingService {
 
   async handleWebhook(rawBody: Buffer, signature: string) {
     const secret = process.env.STRIPE_WEBHOOK_SECRET;
-    if (!secret) throw new ServiceUnavailableException('Stripe webhook secret is not configured');
+    if (!secret)
+      throw new ServiceUnavailableException(
+        'Stripe webhook secret is not configured',
+      );
     const stripe = this.getStripe();
     let event: Stripe.Event;
     try {
@@ -149,7 +173,12 @@ export class BillingService {
           status: 'processing',
           lockedUntil: { $lte: now },
         },
-        { $set: { lockedUntil: new Date(now.getTime() + 120_000), type: event.type } },
+        {
+          $set: {
+            lockedUntil: new Date(now.getTime() + 120_000),
+            type: event.type,
+          },
+        },
       );
       if (lock.modifiedCount === 0) {
         throw new ServiceUnavailableException(
@@ -181,7 +210,8 @@ export class BillingService {
         const checkout = event.data.object as Stripe.Checkout.Session;
         const organizationId =
           checkout.metadata?.organizationId ?? checkout.client_reference_id;
-        if (!organizationId) throw new Error('Checkout event is missing organization metadata');
+        if (!organizationId)
+          throw new Error('Checkout event is missing organization metadata');
         await this.database.getModel<Subscription>('Subscription').updateOne(
           { organizationId },
           {
@@ -200,28 +230,37 @@ export class BillingService {
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted':
-        await this.processSubscription(event.data.object as Stripe.Subscription, event.type);
+        await this.processSubscription(
+          event.data.object as Stripe.Subscription,
+          event.type,
+        );
         break;
       case 'invoice.paid':
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
         const customerId = this.idOf(invoice.customer);
-        if (!customerId) throw new Error('Invoice event is missing the Stripe customer');
-        const updated = await this.database.getModel<Subscription>('Subscription').findOneAndUpdate(
-          { stripeCustomerId: customerId, status: { $ne: 'canceled' } },
-          {
-            $set: {
-              status: event.type === 'invoice.paid' ? 'active' : 'past_due',
-              ...(event.type === 'invoice.paid' ? { canceledAt: null } : {}),
+        if (!customerId)
+          throw new Error('Invoice event is missing the Stripe customer');
+        const updated = await this.database
+          .getModel<Subscription>('Subscription')
+          .findOneAndUpdate(
+            { stripeCustomerId: customerId, status: { $ne: 'canceled' } },
+            {
+              $set: {
+                status: event.type === 'invoice.paid' ? 'active' : 'past_due',
+                ...(event.type === 'invoice.paid' ? { canceledAt: null } : {}),
+              },
             },
-          },
-          { new: true },
-        );
+            { new: true },
+          );
         if (updated) {
           await this.audit.record({
             organizationId: updated.organizationId.toString(),
             actorId: null,
-            action: event.type === 'invoice.paid' ? 'billing.invoice_paid' : 'billing.payment_failed',
+            action:
+              event.type === 'invoice.paid'
+                ? 'billing.invoice_paid'
+                : 'billing.payment_failed',
             targetType: 'subscription',
             targetId: updated.stripeSubscriptionId,
           });
@@ -229,7 +268,9 @@ export class BillingService {
         break;
       }
       default:
-        this.logger.debug(`Acknowledging unsupported Stripe event ${event.type}`);
+        this.logger.debug(
+          `Acknowledging unsupported Stripe event ${event.type}`,
+        );
     }
   }
 
@@ -255,36 +296,48 @@ export class BillingService {
             : amount / intervalCount;
     const canceledAt =
       subscription.status === 'canceled'
-        ? new Date((subscription.canceled_at ?? Math.floor(Date.now() / 1000)) * 1000)
+        ? new Date(
+            (subscription.canceled_at ?? Math.floor(Date.now() / 1000)) * 1000,
+          )
         : null;
     const filter = organizationId
       ? { organizationId }
       : customerId
         ? { stripeCustomerId: customerId }
         : null;
-    if (!filter) throw new Error('Subscription event is missing organization and customer IDs');
-    if (!organizationId && !(await this.database.getModel<Subscription>('Subscription').exists(filter))) {
+    if (!filter)
+      throw new Error(
+        'Subscription event is missing organization and customer IDs',
+      );
+    if (
+      !organizationId &&
+      !(await this.database
+        .getModel<Subscription>('Subscription')
+        .exists(filter))
+    ) {
       throw new Error('Subscription does not match a known organization');
     }
-    const updated = await this.database.getModel<Subscription>('Subscription').findOneAndUpdate(
-      filter,
-      {
-        $set: {
-          stripeCustomerId: customerId,
-          stripeSubscriptionId: subscription.id,
-          plan: metadata.plan ?? price?.lookup_key ?? 'paid',
-          status: subscription.status,
-          amountCents: Math.round(monthlyAmount),
-          currency: price?.currency ?? 'usd',
-          currentPeriodEnd: subscription.current_period_end
-            ? new Date(subscription.current_period_end * 1000)
-            : null,
-          canceledAt,
+    const updated = await this.database
+      .getModel<Subscription>('Subscription')
+      .findOneAndUpdate(
+        filter,
+        {
+          $set: {
+            stripeCustomerId: customerId,
+            stripeSubscriptionId: subscription.id,
+            plan: metadata.plan ?? price?.lookup_key ?? 'paid',
+            status: subscription.status,
+            amountCents: Math.round(monthlyAmount),
+            currency: price?.currency ?? 'usd',
+            currentPeriodEnd: item?.current_period_end
+              ? new Date(item.current_period_end * 1000)
+              : null,
+            canceledAt,
+          },
+          ...(organizationId ? { $setOnInsert: { organizationId } } : {}),
         },
-        ...(organizationId ? { $setOnInsert: { organizationId } } : {}),
-      },
-      { upsert: Boolean(organizationId), new: true },
-    );
+        { upsert: Boolean(organizationId), new: true },
+      );
     if (updated) {
       await this.audit.record({
         organizationId: updated.organizationId.toString(),
@@ -309,17 +362,22 @@ export class BillingService {
 
   private requiredUrl(name: string): string {
     const value = process.env[name];
-    if (!value) throw new ServiceUnavailableException(`${name} is not configured`);
+    if (!value)
+      throw new ServiceUnavailableException(`${name} is not configured`);
     try {
       const url = new URL(value);
       if (!['http:', 'https:'].includes(url.protocol)) throw new Error();
       return url.toString();
     } catch {
-      throw new ServiceUnavailableException(`${name} must be a valid HTTP(S) URL`);
+      throw new ServiceUnavailableException(
+        `${name} must be a valid HTTP(S) URL`,
+      );
     }
   }
 
-  private idOf(value: string | { id: string } | null | undefined): string | null {
+  private idOf(
+    value: string | { id: string } | null | undefined,
+  ): string | null {
     if (!value) return null;
     return typeof value === 'string' ? value : value.id;
   }

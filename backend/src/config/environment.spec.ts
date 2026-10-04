@@ -18,7 +18,8 @@ describe('environment validation', () => {
       validateEnvironment({
         NODE_ENV: 'production',
         MONGODB_URI: 'mongodb://database.internal/saas_growth_engine',
-        JWT_SECRET: 'replace-with-a-unique-random-secret-at-least-32-characters',
+        JWT_SECRET:
+          'replace-with-a-unique-random-secret-at-least-32-characters',
         FRONTEND_URL: 'https://app.example.com',
       }),
     ).toThrow('Invalid environment configuration');

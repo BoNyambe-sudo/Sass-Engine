@@ -1,6 +1,10 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service.js';
-import { AccessTokenGuard, AuthContext, CurrentAuth } from '../auth/auth.context.js';
+import {
+  AccessTokenGuard,
+  CurrentAuth,
+} from '../auth/auth.context.js';
+import type { AuthContext } from '../auth/auth.context.js';
 
 @Controller('analytics')
 @UseGuards(AccessTokenGuard)

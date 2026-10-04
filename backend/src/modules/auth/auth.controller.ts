@@ -10,8 +10,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { Request, Response } from 'express';
-import { AccessTokenGuard, CurrentAuth, AuthContext } from './auth.context.js';
+import type { Request, Response } from 'express';
+import { AccessTokenGuard, CurrentAuth } from './auth.context.js';
+import type { AuthContext } from './auth.context.js';
 import {
   AcceptInvitationDto,
   ForgotPasswordDto,
@@ -66,7 +67,9 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const result = await this.authService.refresh(request.cookies?.refresh_token);
+    const result = await this.authService.refresh(
+      request.cookies?.refresh_token,
+    );
     return this.withRefreshCookie(result, response);
   }
 
@@ -117,7 +120,12 @@ export class AuthController {
   @Get('me')
   @UseGuards(AccessTokenGuard)
   me(@CurrentAuth() auth: AuthContext) {
-    return { userId: auth.userId, email: auth.email, organizationId: auth.organizationId, role: auth.role };
+    return {
+      userId: auth.userId,
+      email: auth.email,
+      organizationId: auth.organizationId,
+      role: auth.role,
+    };
   }
 
   private withRefreshCookie(
@@ -130,7 +138,12 @@ export class AuthController {
     response: Response,
   ) {
     response.cookie('refresh_token', result.refreshToken, refreshCookie);
-    const { refreshToken: _refreshToken, verificationToken, invitationToken, ...safe } = result;
+    const {
+      refreshToken: _refreshToken,
+      verificationToken,
+      invitationToken,
+      ...safe
+    } = result;
     return {
       ...safe,
       ...(verificationToken ? { verificationToken } : {}),

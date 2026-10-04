@@ -9,11 +9,11 @@ import {
 import { AuditLog } from '../database/models.js';
 import {
   AccessTokenGuard,
-  AuthContext,
   CurrentAuth,
   Roles,
   RolesGuard,
 } from '../auth/auth.context.js';
+import type { AuthContext } from '../auth/auth.context.js';
 import { DatabaseService } from '../database/database.service.js';
 
 @Controller('audit')

@@ -5,18 +5,18 @@ import {
   Get,
   Headers,
   Post,
-  RawBodyRequest,
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { Request } from 'express';
+import type { RawBodyRequest } from '@nestjs/common';
+import type { Request } from 'express';
 import {
   AccessTokenGuard,
-  AuthContext,
   CurrentAuth,
   Roles,
   RolesGuard,
 } from '../auth/auth.context.js';
+import type { AuthContext } from '../auth/auth.context.js';
 import { CheckoutDto } from './billing.dto.js';
 import { BillingService } from './billing.service.js';
 
@@ -58,7 +58,9 @@ export class BillingController {
     @Headers('stripe-signature') signature: string | undefined,
   ) {
     if (!signature || !request.rawBody) {
-      throw new BadRequestException('Missing Stripe signature or raw request body');
+      throw new BadRequestException(
+        'Missing Stripe signature or raw request body',
+      );
     }
     return this.billing.handleWebhook(request.rawBody, signature);
   }

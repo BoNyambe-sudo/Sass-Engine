@@ -7,11 +7,8 @@ describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [
-        { provide: ApiService, useValue: { session: signal(null) } },
-      ],
-    })
-      .compileComponents();
+      providers: [{ provide: ApiService, useValue: { session: signal(null) } }],
+    }).compileComponents();
   });
 
   it('should create the app', () => {

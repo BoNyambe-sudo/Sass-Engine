@@ -19,10 +19,7 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   return next(authenticatedRequest).pipe(
     catchError((error: unknown) => {
       const isUnauthorized =
-        typeof error === 'object' &&
-        error !== null &&
-        'status' in error &&
-        error.status === 401;
+        typeof error === 'object' && error !== null && 'status' in error && error.status === 401;
       if (
         !isUnauthorized ||
         !session ||

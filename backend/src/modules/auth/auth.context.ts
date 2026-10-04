@@ -70,7 +70,9 @@ export class AccessTokenGuard implements CanActivate {
       throw new UnauthorizedException('Account no longer exists');
     }
     if (!user.emailVerifiedAt) {
-      throw new ForbiddenException('Verify your email before using this workspace');
+      throw new ForbiddenException(
+        'Verify your email before using this workspace',
+      );
     }
 
     const requestedOrganization = request.headers['x-organization-id'];

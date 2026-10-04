@@ -26,7 +26,9 @@ export class AuditService {
   private redact(metadata: Record<string, unknown>): Record<string, unknown> {
     return Object.fromEntries(
       Object.entries(metadata)
-        .filter(([key]) => !/(password|token|secret|authorization|cookie)/i.test(key))
+        .filter(
+          ([key]) => !/(password|token|secret|authorization|cookie)/i.test(key),
+        )
         .map(([key, value]) => [
           key,
           key.toLowerCase() === 'email' && typeof value === 'string'

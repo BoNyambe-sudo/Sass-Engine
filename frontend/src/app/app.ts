@@ -6,7 +6,8 @@ import { ApiService, SessionResponse } from './core/api.service';
 type Section = 'overview' | 'members' | 'billing' | 'audit' | 'settings';
 
 interface MetricOverview {
-  mrr: number;
+  mrr: number | null;
+  mrrCurrency: string | null;
   churn: number;
   activeSubscriptions: number;
   newUsers: number;
@@ -26,6 +27,14 @@ interface PendingInvitation {
   email: string;
   role: Member['role'];
   expiresAt: string;
+}
+
+interface SubscriptionState {
+  plan: string;
+  status: string;
+  amountCents?: number;
+  currency?: string;
+  currentPeriodEnd?: string | null;
 }
 
 interface Plan {
@@ -57,7 +66,7 @@ export class App implements OnInit {
   readonly members = signal<Member[]>([]);
   readonly invitations = signal<PendingInvitation[]>([]);
   readonly plans = signal<Plan[]>([]);
-  readonly subscription = signal<{ plan: string; status: string; amountCents?: number; currency?: string; currentPeriodEnd?: string | null } | null>(null);
+  readonly subscription = signal<SubscriptionState | null>(null);
   readonly auditLogs = signal<AuditRecord[]>([]);
   readonly organization = signal<{ id: string; name: string; slug: string; memberCount: number } | null>(null);
   readonly loading = signal(true);
@@ -169,52 +178,51 @@ export class App implements OnInit {
         await this.api.post('auth/verify-email', { token: result.verificationToken });
         this.notice.set('Your email has been verified. Welcome to your workspace.');
       }
-    }
-
-      toggleAuthMode(): void {
-        this.authMode.update((mode) => (mode === 'login' ? 'signup' : 'login'));
-        this.error.set('');
-        this.notice.set('');
-      }
-
-      async forgotPassword(): Promise<void> {
-        if (!this.email.trim()) {
-          this.error.set('Enter your work email first.');
-          return;
-        }
-        this.error.set('');
-        try {
-          const result = await this.api.post<{ message: string }>('auth/forgot-password', {
-            email: this.email,
-          });
-          this.notice.set(result.message);
-        } catch (error) {
-          this.showError(error);
-        }
-      }
-
-      firstName(): string {
-        return this.session()?.user.name.split(/\s+/)[0] ?? '';
-      }
-
-      memberInitials(name: string): string {
-        return name
-          .split(/\s+/)
-          .slice(0, 2)
-          .map((part) => part[0]?.toUpperCase() ?? '')
-          .join('');
-      }
-
-      chartHeight(data: MetricOverview, value: number): number {
-        const max = Math.max(...data.series.newUsers.map((point) => point.value), 1);
-        return Math.max(7, (value * 100) / max);
-      }
       await this.loadSection('overview');
     } catch (error) {
       this.showError(error);
     } finally {
       this.busy.set(false);
     }
+  }
+
+  toggleAuthMode(): void {
+    this.authMode.update((mode) => (mode === 'login' ? 'signup' : 'login'));
+    this.error.set('');
+    this.notice.set('');
+  }
+
+  async forgotPassword(): Promise<void> {
+    if (!this.email.trim()) {
+      this.error.set('Enter your work email first.');
+      return;
+    }
+    this.error.set('');
+    try {
+      const result = await this.api.post<{ message: string }>('auth/forgot-password', {
+        email: this.email,
+      });
+      this.notice.set(result.message);
+    } catch (error) {
+      this.showError(error);
+    }
+  }
+
+  firstName(): string {
+    return this.session()?.user.name.split(/\s+/)[0] ?? '';
+  }
+
+  memberInitials(name: string): string {
+    return name
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? '')
+      .join('');
+  }
+
+  chartHeight(data: MetricOverview, value: number): number {
+    const max = Math.max(...data.series.newUsers.map((point) => point.value), 1);
+    return Math.max(7, (value * 100) / max);
   }
 
   async selectSection(section: Section): Promise<void> {
@@ -246,7 +254,7 @@ export class App implements OnInit {
       billing: async () => {
         const [plans, current] = await Promise.all([
           this.api.get<Plan[]>('billing/plans'),
-          this.api.get<NonNullable<ReturnType<typeof this.subscription>>>('billing/subscription'),
+          this.api.get<SubscriptionState>('billing/subscription'),
         ]);
         this.plans.set(plans);
         this.subscription.set(current);
@@ -397,10 +405,10 @@ export class App implements OnInit {
     this.theme.update((value) => (value === 'light' ? 'dark' : 'light'));
   }
 
-  formatMoney(value: number | undefined): string {
+  formatMoney(value: number | undefined | null, currency?: string | null): string {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: this.subscription()?.currency?.toUpperCase() ?? 'USD',
+      currency: currency?.toUpperCase() ?? this.subscription()?.currency?.toUpperCase() ?? 'USD',
       maximumFractionDigits: 0,
     }).format(value ?? 0);
   }

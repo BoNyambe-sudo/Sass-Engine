@@ -7,7 +7,13 @@ import {
   Patch,
   UseGuards,
 } from '@nestjs/common';
-import { AccessTokenGuard, AuthContext, CurrentAuth, Roles, RolesGuard } from '../auth/auth.context.js';
+import {
+  AccessTokenGuard,
+  CurrentAuth,
+  Roles,
+  RolesGuard,
+} from '../auth/auth.context.js';
+import type { AuthContext } from '../auth/auth.context.js';
 import { UpdateOrganizationDto } from '../auth/auth.dto.js';
 import { AuditService } from '../audit/audit.service.js';
 import { DatabaseService } from '../database/database.service.js';

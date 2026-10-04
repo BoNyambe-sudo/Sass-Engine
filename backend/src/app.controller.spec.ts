@@ -24,7 +24,6 @@ describe('AppController', () => {
         ok: true,
         service: 'saas-growth-engine-api',
       });
-
     });
   });
 });
