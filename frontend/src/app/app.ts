@@ -68,7 +68,12 @@ export class App implements OnInit {
   readonly plans = signal<Plan[]>([]);
   readonly subscription = signal<SubscriptionState | null>(null);
   readonly auditLogs = signal<AuditRecord[]>([]);
-  readonly organization = signal<{ id: string; name: string; slug: string; memberCount: number } | null>(null);
+  readonly organization = signal<{
+    id: string;
+    name: string;
+    slug: string;
+    memberCount: number;
+  } | null>(null);
   readonly loading = signal(true);
   readonly busy = signal(false);
   readonly error = signal('');
@@ -77,9 +82,7 @@ export class App implements OnInit {
   readonly showPassword = signal(false);
   readonly theme = signal<'light' | 'dark'>('light');
   readonly admin = computed(() => this.session()?.role === 'ADMIN');
-  readonly canManageMembers = computed(
-    () => this.admin() || this.session()?.role === 'MANAGER',
-  );
+  readonly canManageMembers = computed(() => this.admin() || this.session()?.role === 'MANAGER');
   readonly initials = computed(() =>
     (this.session()?.user.name ?? 'U')
       .split(/\s+/)
@@ -152,23 +155,24 @@ export class App implements OnInit {
         globalThis.history.replaceState(null, '', globalThis.location.pathname);
         return;
       }
-      const result = this.authMode() === 'invite'
-        ? await this.api.post<SessionResponse>('auth/accept-invitation', {
-            token: this.invitationToken,
-            name: this.fullName,
-            password: this.password,
-          })
-        : this.authMode() === 'signup'
-          ? await this.api.post<SessionResponse>('auth/signup', {
-              email: this.email,
-              password: this.password,
+      const result =
+        this.authMode() === 'invite'
+          ? await this.api.post<SessionResponse>('auth/accept-invitation', {
+              token: this.invitationToken,
               name: this.fullName,
-              organizationName: this.organizationName,
-            })
-          : await this.api.post<SessionResponse>('auth/login', {
-              email: this.email,
               password: this.password,
-            });
+            })
+          : this.authMode() === 'signup'
+            ? await this.api.post<SessionResponse>('auth/signup', {
+                email: this.email,
+                password: this.password,
+                name: this.fullName,
+                organizationName: this.organizationName,
+              })
+            : await this.api.post<SessionResponse>('auth/login', {
+                email: this.email,
+                password: this.password,
+              });
       if (this.authMode() === 'invite') {
         globalThis.history.replaceState(null, '', globalThis.location.pathname);
         this.invitationToken = '';
@@ -264,7 +268,12 @@ export class App implements OnInit {
         this.auditLogs.set(result.items);
       },
       settings: async () => {
-        const result = await this.api.get<{ id: string; name: string; slug: string; memberCount: number }>('organizations/current');
+        const result = await this.api.get<{
+          id: string;
+          name: string;
+          slug: string;
+          memberCount: number;
+        }>('organizations/current');
         this.organization.set(result);
         this.organizationNameInput = result.name;
       },
@@ -328,20 +337,20 @@ export class App implements OnInit {
     } finally {
       this.busy.set(false);
     }
+  }
 
-    async revokeInvitation(invitation: PendingInvitation): Promise<void> {
-      if (!globalThis.confirm(`Revoke the invitation for ${invitation.email}?`)) return;
-      this.busy.set(true);
-      this.error.set('');
-      try {
-        await this.api.delete(`users/invitations/${invitation._id}`);
-        this.notice.set(`The invitation for ${invitation.email} was revoked.`);
-        await this.loadSection('members');
-      } catch (error) {
-        this.showError(error);
-      } finally {
-        this.busy.set(false);
-      }
+  async revokeInvitation(invitation: PendingInvitation): Promise<void> {
+    if (!globalThis.confirm(`Revoke the invitation for ${invitation.email}?`)) return;
+    this.busy.set(true);
+    this.error.set('');
+    try {
+      await this.api.delete(`users/invitations/${invitation._id}`);
+      this.notice.set(`The invitation for ${invitation.email} was revoked.`);
+      await this.loadSection('members');
+    } catch (error) {
+      this.showError(error);
+    } finally {
+      this.busy.set(false);
     }
   }
 
@@ -378,10 +387,10 @@ export class App implements OnInit {
     this.error.set('');
     try {
       this.organization.set(
-      await this.api.patch<{ id: string; name: string; slug: string; memberCount: number }>(
-        'organizations/current',
-        { name: this.organizationNameInput },
-      ),
+        await this.api.patch<{ id: string; name: string; slug: string; memberCount: number }>(
+          'organizations/current',
+          { name: this.organizationNameInput },
+        ),
       );
       this.notice.set('Workspace settings saved.');
     } catch (error) {
@@ -429,7 +438,7 @@ export class App implements OnInit {
     this.error.set(
       Array.isArray(message)
         ? message.join(', ')
-        : message ?? 'Something went wrong. Please try again.',
+        : (message ?? 'Something went wrong. Please try again.'),
     );
   }
 }
