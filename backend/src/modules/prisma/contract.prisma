@@ -1,10 +1,4 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-}
+// use prisma-8
 
 enum Role {
   ADMIN
