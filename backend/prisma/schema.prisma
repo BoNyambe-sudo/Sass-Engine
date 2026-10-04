@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  VIEWER
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  INCOMPLETE
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String
+  passwordHash    String
+  role            Role      @default(VIEWER)
+  isEmailVerified Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  organizationId  String?
+  organization    Organization? @relation(fields: [organizationId], references: [id])
+
+  refreshTokens   RefreshToken[]
+  auditLogs       AuditLog[]
+}
+
+model Organization {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  users       User[]
+  plans       Plan[]
+  subscriptions Subscription[]
+  auditLogs   AuditLog[]
+}
+
+model Plan {
+  id              String        @id @default(cuid())
+  name            String
+  slug            String        @unique
+  monthlyPrice    Int
+  currency        String        @default("USD")
+  stripePriceId   String?
+  features        Json?
+  organizationId  String?
+  organization     Organization? @relation(fields: [organizationId], references: [id])
+  subscriptions   Subscription[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model Subscription {
+  id                 String              @id @default(cuid())
+  status             SubscriptionStatus   @default(ACTIVE)
+  stripeCustomerId   String?
+  stripeSubscriptionId String?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  planId            String?
+  plan              Plan?               @relation(fields: [planId], references: [id])
+  organizationId     String?
+  organization       Organization?       @relation(fields: [organizationId], references: [id])
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  action      String
+  entity      String
+  details     Json?
+  actorId     String?
+  actor       User?       @relation(fields: [actorId], references: [id])
+  organizationId String?
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  createdAt   DateTime    @default(now())
+}
+
+model RefreshToken {
+  id          String   @id @default(cuid())
+  token       String   @unique
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+}
+
+model OrganizationInvite {
+  id          String   @id @default(cuid())
+  email       String
+  role        Role     @default(VIEWER)
+  orgName     String
+  invitedBy   String
+  token       String   @unique
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+}

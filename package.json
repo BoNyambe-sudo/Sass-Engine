@@ -1,0 +1,26 @@
+{
+  "name": "saas-growth-engine",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@12.9.1",
+  "scripts": {
+    "dev": "pnpm --recursive --parallel --if-present dev",
+    "dev:backend": "pnpm --filter @saas-growth-engine/backend start:dev",
+    "dev:frontend": "pnpm --filter @saas-growth-engine/frontend start",
+    "build": "pnpm --recursive --if-present build",
+    "lint": "pnpm --recursive --if-present lint",
+    "test": "pnpm --recursive --if-present test",
+    "format": "prettier --write \"**/*.{ts,html,scss,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,html,scss,json,md,yml,yaml}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "lmdb",
+      "msgpackr-extract"
+    ]
+  }
+}
