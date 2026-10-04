@@ -209,6 +209,7 @@ const auditLogSchema = new Schema<AuditLog>(
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );
+auditLogSchema.index({ organizationId: 1, createdAt: -1 });
 
 const stripeEventSchema = new Schema<StripeEvent>({
   eventId: { type: String, required: true, unique: true },

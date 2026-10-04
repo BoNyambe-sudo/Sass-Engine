@@ -21,7 +21,7 @@ export class AnalyticsService {
     const subscriptions = this.database.getModel<Subscription>('Subscription');
     const members = this.database.getModel<Membership>('Membership');
     const scope = { organizationId };
-    const [revenue, activeSubscriptions, totalSubscriptions, canceled, newUsers, series] =
+    const [revenue, activeSubscriptions, activeAtStart, canceled, newUsers, series] =
       await Promise.all([
         subscriptions.aggregate([
           { $match: { ...scope, status: { $in: ['active', 'trialing'] } } },
@@ -31,7 +31,14 @@ export class AnalyticsService {
           ...scope,
           status: { $in: ['active', 'trialing'] },
         }),
-        subscriptions.countDocuments(scope),
+        subscriptions.countDocuments({
+          ...scope,
+          createdAt: { $lt: rangeStart },
+          $or: [
+            { status: { $in: ['active', 'trialing'] } },
+            { canceledAt: { $gte: rangeStart } },
+          ],
+        }),
         subscriptions.countDocuments({
           ...scope,
           canceledAt: { $gte: rangeStart, $lt: rangeEnd },
@@ -62,7 +69,8 @@ export class AnalyticsService {
           { $sort: { _id: 1 } },
         ]),
       ]);
-    const churn = totalSubscriptions === 0 ? 0 : (canceled / totalSubscriptions) * 100;
+    const churn =
+      activeAtStart === 0 ? 0 : (canceled / activeAtStart) * 100;
 
     return {
       range: { from: rangeStart.toISOString(), to: rangeEnd.toISOString() },

@@ -9,6 +9,8 @@ const environmentSchema = z.object({
   JWT_EXPIRY: z.string().default('15m'),
   JWT_REFRESH_DAYS: z.coerce.number().int().min(1).max(90).default(7),
   FRONTEND_URL: z.string().url().default('http://localhost:4200'),
+  RESEND_API_KEY: z.string().optional(),
+  EMAIL_FROM: z.string().optional(),
 });
 
 export function validateEnvironment(environment: Record<string, unknown>) {

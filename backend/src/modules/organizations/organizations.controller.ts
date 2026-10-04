@@ -75,6 +75,10 @@ export class OrganizationsController {
       targetId: auth.organizationId,
       metadata: { name: organization.name },
     });
-    return organization;
+    return {
+      id: organization._id.toString(),
+      name: organization.name,
+      slug: organization.slug,
+    };
   }
 }

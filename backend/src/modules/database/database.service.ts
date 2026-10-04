@@ -16,6 +16,10 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private connection?: Connection;
   private readonly models = new Map<ModelName, Model<any>>();
 
+  get isConnected(): boolean {
+    return this.connection?.readyState === 1;
+  }
+
   async onModuleInit(): Promise<void> {
     const uri = process.env.MONGODB_URI;
     if (!uri) {

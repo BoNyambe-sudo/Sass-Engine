@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@12.9.1",
   "scripts": {
-    "dev": "pnpm --recursive --parallel --if-present dev",
+    "dev": "pnpm --parallel --filter @saas-growth-engine/backend --filter @saas-growth-engine/frontend dev",
     "dev:backend": "pnpm --filter @saas-growth-engine/backend start:dev",
     "dev:frontend": "pnpm --filter @saas-growth-engine/frontend start",
     "build": "pnpm --recursive --if-present build",

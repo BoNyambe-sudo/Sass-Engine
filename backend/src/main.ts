@@ -9,6 +9,7 @@ import { AppModule } from './app.module.js';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { rawBody: true });
 
+  app.set('trust proxy', 1);
   app.use(cookieParser());
   app.use(helmet());
   const origins = (process.env.CORS_ORIGINS ?? process.env.FRONTEND_URL ?? 'http://localhost:4200')
@@ -42,6 +43,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
+  app.enableShutdownHooks();
   await app.listen(process.env.PORT ?? 3000);
 }
 

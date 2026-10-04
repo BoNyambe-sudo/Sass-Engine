@@ -21,6 +21,13 @@ interface Member {
   joinedAt: string;
 }
 
+interface PendingInvitation {
+  _id: string;
+  email: string;
+  role: Member['role'];
+  expiresAt: string;
+}
+
 interface Plan {
   key: 'starter' | 'growth' | 'scale';
   name: string;
@@ -41,7 +48,6 @@ interface AuditRecord {
 @Component({
   imports: [CommonModule, FormsModule],
   selector: 'app-root',
-  styleUrl: './app.scss',
   templateUrl: './app.html',
 })
 export class App implements OnInit {
@@ -49,6 +55,7 @@ export class App implements OnInit {
   readonly activeSection = signal<Section>('overview');
   readonly overview = signal<MetricOverview | null>(null);
   readonly members = signal<Member[]>([]);
+  readonly invitations = signal<PendingInvitation[]>([]);
   readonly plans = signal<Plan[]>([]);
   readonly subscription = signal<{ plan: string; status: string; amountCents?: number; currency?: string; currentPeriodEnd?: string | null } | null>(null);
   readonly auditLogs = signal<AuditRecord[]>([]);
@@ -57,10 +64,13 @@ export class App implements OnInit {
   readonly busy = signal(false);
   readonly error = signal('');
   readonly notice = signal('');
-  readonly authMode = signal<'login' | 'signup'>('login');
+  readonly authMode = signal<'login' | 'signup' | 'reset' | 'invite'>('login');
   readonly showPassword = signal(false);
   readonly theme = signal<'light' | 'dark'>('light');
   readonly admin = computed(() => this.session()?.role === 'ADMIN');
+  readonly canManageMembers = computed(
+    () => this.admin() || this.session()?.role === 'MANAGER',
+  );
   readonly initials = computed(() =>
     (this.session()?.user.name ?? 'U')
       .split(/\s+/)
@@ -77,12 +87,35 @@ export class App implements OnInit {
   inviteRole: Member['role'] = 'VIEWER';
   organizationNameInput = '';
   readonly today = new Date();
+  private resetToken = '';
+  private invitationToken = '';
 
   constructor(private readonly api: ApiService) {
     this.session = api.session;
   }
 
   async ngOnInit(): Promise<void> {
+    const hash = new URLSearchParams(globalThis.location.hash.slice(1));
+    const verificationToken = hash.get('verify');
+    this.resetToken = hash.get('reset') ?? '';
+    this.invitationToken = hash.get('invite') ?? '';
+    if (this.resetToken) this.authMode.set('reset');
+    if (this.invitationToken) this.authMode.set('invite');
+    if (verificationToken) {
+      try {
+        await this.api.post('auth/verify-email', { token: verificationToken });
+        this.notice.set('Your email has been verified. You can sign in now.');
+      } catch (error) {
+        this.showError(error);
+      } finally {
+        globalThis.history.replaceState(null, '', globalThis.location.pathname);
+      }
+    }
+    if (this.resetToken || this.invitationToken) {
+      this.api.clearSession();
+      this.loading.set(false);
+      return;
+    }
     try {
       const result = await this.api.post<SessionResponse>('auth/refresh', {});
       this.api.setSession(result);
@@ -99,8 +132,25 @@ export class App implements OnInit {
     this.notice.set('');
     this.busy.set(true);
     try {
-      const result =
-        this.authMode() === 'signup'
+      if (this.authMode() === 'reset') {
+        await this.api.post('auth/reset-password', {
+          token: this.resetToken,
+          password: this.password,
+        });
+        this.authMode.set('login');
+        this.password = '';
+        this.resetToken = '';
+        this.notice.set('Your password has been updated. Sign in with your new password.');
+        globalThis.history.replaceState(null, '', globalThis.location.pathname);
+        return;
+      }
+      const result = this.authMode() === 'invite'
+        ? await this.api.post<SessionResponse>('auth/accept-invitation', {
+            token: this.invitationToken,
+            name: this.fullName,
+            password: this.password,
+          })
+        : this.authMode() === 'signup'
           ? await this.api.post<SessionResponse>('auth/signup', {
               email: this.email,
               password: this.password,
@@ -111,11 +161,16 @@ export class App implements OnInit {
               email: this.email,
               password: this.password,
             });
+      if (this.authMode() === 'invite') {
+        globalThis.history.replaceState(null, '', globalThis.location.pathname);
+        this.invitationToken = '';
+      }
       this.api.setSession(result);
       if (result.verificationToken) {
         await this.api.post('auth/verify-email', { token: result.verificationToken });
         this.notice.set('Your email has been verified. Welcome to your workspace.');
       }
+    }
 
       toggleAuthMode(): void {
         this.authMode.update((mode) => (mode === 'login' ? 'signup' : 'login'));
@@ -180,8 +235,14 @@ export class App implements OnInit {
         );
       },
       members: async () => {
-        const result = await this.api.get<{ items: Member[] }>('users?limit=100');
+        const [result, invitations] = await Promise.all([
+          this.api.get<{ items: Member[] }>('users?limit=100'),
+          this.canManageMembers()
+            ? this.api.get<PendingInvitation[]>('users/invitations')
+            : Promise.resolve([]),
+        ]);
         this.members.set(result.items);
+        this.invitations.set(invitations);
       },
       billing: async () => {
         const [plans, current] = await Promise.all([
@@ -259,6 +320,21 @@ export class App implements OnInit {
       this.showError(error);
     } finally {
       this.busy.set(false);
+    }
+
+    async revokeInvitation(invitation: PendingInvitation): Promise<void> {
+      if (!globalThis.confirm(`Revoke the invitation for ${invitation.email}?`)) return;
+      this.busy.set(true);
+      this.error.set('');
+      try {
+        await this.api.delete(`users/invitations/${invitation._id}`);
+        this.notice.set(`The invitation for ${invitation.email} was revoked.`);
+        await this.loadSection('members');
+      } catch (error) {
+        this.showError(error);
+      } finally {
+        this.busy.set(false);
+      }
     }
   }
 

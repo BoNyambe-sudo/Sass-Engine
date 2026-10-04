@@ -114,9 +114,10 @@ export class BillingService {
   async handleWebhook(rawBody: Buffer, signature: string) {
     const secret = process.env.STRIPE_WEBHOOK_SECRET;
     if (!secret) throw new ServiceUnavailableException('Stripe webhook secret is not configured');
+    const stripe = this.getStripe();
     let event: Stripe.Event;
     try {
-      event = this.getStripe().webhooks.constructEvent(rawBody, signature, secret);
+      event = stripe.webhooks.constructEvent(rawBody, signature, secret);
     } catch {
       throw new BadRequestException('Invalid Stripe signature');
     }
@@ -147,7 +148,9 @@ export class BillingService {
         { $set: { lockedUntil: new Date(now.getTime() + 120_000), type: event.type } },
       );
       if (lock.modifiedCount === 0) {
-        return { received: true, duplicate: true, processing: true };
+        throw new ServiceUnavailableException(
+          'This Stripe event is already being processed; retry delivery',
+        );
       }
       acquired = true;
     }
@@ -201,7 +204,7 @@ export class BillingService {
         const customerId = this.idOf(invoice.customer);
         if (!customerId) throw new Error('Invoice event is missing the Stripe customer');
         await this.database.getModel<Subscription>('Subscription').updateOne(
-          { stripeCustomerId: customerId },
+          { stripeCustomerId: customerId, status: { $ne: 'canceled' } },
           {
             $set: {
               status: event.type === 'invoice.paid' ? 'active' : 'past_due',

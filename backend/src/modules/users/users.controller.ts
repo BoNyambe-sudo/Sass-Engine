@@ -27,7 +27,7 @@ import { AuthService } from '../auth/auth.service.js';
 import { ChangeRoleDto, InviteDto } from '../auth/auth.dto.js';
 import { AuditService } from '../audit/audit.service.js';
 import { DatabaseService } from '../database/database.service.js';
-import { Invitation, Membership, User } from '../database/models.js';
+import { Invitation, Membership, Organization, User } from '../database/models.js';
 
 @Controller('users')
 @UseGuards(AccessTokenGuard, RolesGuard)
@@ -99,6 +99,45 @@ export class UsersController {
       .lean();
   }
 
+  @Delete('invitations/:invitationId')
+  @Roles('ADMIN', 'MANAGER')
+  async revokeInvitation(
+    @CurrentAuth() auth: AuthContext,
+    @Param('invitationId') invitationId: string,
+  ) {
+    if (!Types.ObjectId.isValid(invitationId)) {
+      throw new BadRequestException('Invalid invitation ID');
+    }
+    const invitations = this.database.getModel<Invitation>('Invitation');
+    const invitation = await invitations
+      .findOne({
+        _id: invitationId,
+        organizationId: auth.organizationId,
+        acceptedAt: null,
+      })
+      .select('email role');
+    if (!invitation) throw new NotFoundException('Invitation not found');
+    if (auth.role === 'MANAGER' && invitation.role !== 'VIEWER') {
+      throw new ForbiddenException('Managers may only revoke viewer invitations');
+    }
+    const revoked = await invitations.findOneAndDelete({
+        _id: invitationId,
+        organizationId: auth.organizationId,
+        acceptedAt: null,
+        ...(auth.role === 'MANAGER' ? { role: 'VIEWER' } : {}),
+      });
+    if (!revoked) throw new NotFoundException('Invitation not found');
+    await this.audit.record({
+      organizationId: auth.organizationId,
+      actorId: auth.userId,
+      action: 'member.invitation_revoked',
+      targetType: 'invitation',
+      targetId: invitationId,
+      metadata: { email: invitation.email, role: invitation.role },
+    });
+    return { message: 'Invitation revoked.' };
+  }
+
   @Post('invitations')
   @Roles('ADMIN', 'MANAGER')
   async invite(@CurrentAuth() auth: AuthContext, @Body() dto: InviteDto) {
@@ -129,6 +168,7 @@ export class UsersController {
     @Body() dto: ChangeRoleDto,
   ) {
     const membership = await this.findMembership(auth.organizationId, userId);
+    await this.preventOwnerAccessChange(auth.organizationId, userId);
     if (membership.role === 'ADMIN' && dto.role !== 'ADMIN') {
       const admins = await this.database
         .getModel<Membership>('Membership')
@@ -157,6 +197,7 @@ export class UsersController {
     @Param('userId') userId: string,
   ) {
     const membership = await this.findMembership(auth.organizationId, userId);
+    await this.preventOwnerAccessChange(auth.organizationId, userId);
     if (membership.role === 'ADMIN') {
       const admins = await this.database
         .getModel<Membership>('Membership')
@@ -185,5 +226,21 @@ export class UsersController {
       .findOne({ organizationId, userId });
     if (!membership) throw new NotFoundException('Member not found');
     return membership;
+  }
+
+  private async preventOwnerAccessChange(
+    organizationId: string,
+    userId: string,
+  ): Promise<void> {
+    const organization = await this.database
+      .getModel<Organization>('Organization')
+      .findById(organizationId)
+      .select('ownerId')
+      .lean();
+    if (organization?.ownerId.toString() === userId) {
+      throw new ConflictException(
+        'Transfer workspace ownership before changing the owner membership',
+      );
+    }
   }
 }

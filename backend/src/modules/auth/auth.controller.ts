@@ -9,6 +9,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
 import { AccessTokenGuard, CurrentAuth, AuthContext } from './auth.context.js';
 import {
@@ -34,6 +35,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   async signup(
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) response: Response,
@@ -48,6 +50,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() dto: LoginDto,
@@ -74,11 +77,13 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     await this.authService.logout(request.cookies?.refresh_token);
-    response.clearCookie('refresh_token', { ...refreshCookie, maxAge: undefined });
+    const { maxAge: _maxAge, ...cookieOptions } = refreshCookie;
+    response.clearCookie('refresh_token', cookieOptions);
     return { message: 'Signed out.' };
   }
 
   @Post('forgot-password')
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.forgotPassword(dto.email);

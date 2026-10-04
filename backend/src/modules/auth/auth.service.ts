@@ -1,13 +1,15 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
-  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { randomBytes, createHash } from 'node:crypto';
 import * as bcrypt from 'bcryptjs';
 import { DatabaseService } from '../database/database.service.js';
+import { EmailService } from '../email/email.service.js';
+import { AuditService } from '../audit/audit.service.js';
 import {
   Invitation,
   Membership,
@@ -23,11 +25,11 @@ const tokenHash = (token: string) =>
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
-
   constructor(
     private readonly jwtService: JwtService,
     private readonly database: DatabaseService,
+    private readonly email: EmailService,
+    private readonly audit: AuditService,
   ) {}
 
   async signup(
@@ -84,8 +86,37 @@ export class AuthService {
     }
 
     const verificationToken = await this.createOneTimeToken(user._id.toString(), 'verify-email');
-    this.deliverDevelopmentLink('email verification', verificationToken);
+    try {
+      await this.email.sendVerification(
+        user.email,
+        user.name,
+        verificationToken,
+      );
+    } catch (error) {
+      await this.database.getModel<OneTimeToken>('OneTimeToken').deleteOne({
+        tokenHash: tokenHash(verificationToken),
+      });
+      await this.database
+        .getModel<Membership>('Membership')
+        .deleteMany({ organizationId: organization._id });
+      await this.database
+        .getModel('Subscription')
+        .deleteOne({ organizationId: organization._id });
+      await this.database.getModel<Organization>('Organization').deleteOne({
+        _id: organization._id,
+      });
+      await users.deleteOne({ _id: user._id });
+      throw error;
+    }
     const session = await this.createSession(user, organization._id.toString(), 'ADMIN');
+    await this.audit.record({
+      organizationId: organization._id.toString(),
+      actorId: user._id.toString(),
+      action: 'auth.signup',
+      targetType: 'user',
+      targetId: user._id.toString(),
+      metadata: { email: user.email },
+    });
     return {
       user: this.publicUser(user),
       organization: { id: organization._id.toString(), name: organization.name },
@@ -102,6 +133,9 @@ export class AuthService {
     if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
       throw new UnauthorizedException('Invalid email or password');
     }
+    if (!user.emailVerifiedAt) {
+      throw new ForbiddenException('Verify your email before signing in');
+    }
     const membership = await this.database
       .getModel<Membership>('Membership')
       .findOne({ userId: user._id })
@@ -113,6 +147,13 @@ export class AuthService {
       .select('_id name');
     if (!organization) throw new UnauthorizedException('Organization no longer exists');
 
+    await this.audit.record({
+      organizationId: organization._id.toString(),
+      actorId: user._id.toString(),
+      action: 'auth.login',
+      targetType: 'user',
+      targetId: user._id.toString(),
+    });
     return {
       user: this.publicUser(user),
       organization: { id: organization._id.toString(), name: organization.name },
@@ -127,8 +168,15 @@ export class AuthService {
   async refresh(rawToken: string | undefined) {
     if (!rawToken) throw new UnauthorizedException('Refresh session required');
     const sessions = this.database.getModel<RefreshSession>('RefreshSession');
-    const session = await sessions
-      .findOne({ tokenHash: tokenHash(rawToken), revokedAt: null, expiresAt: { $gt: new Date() } })
+    const session = await sessions.findOneAndUpdate(
+      {
+        tokenHash: tokenHash(rawToken),
+        revokedAt: null,
+        expiresAt: { $gt: new Date() },
+      },
+      { $set: { revokedAt: new Date() } },
+      { new: false },
+    )
       .select('+tokenHash');
     if (!session) throw new UnauthorizedException('Refresh session expired');
     const user = await this.database.getModel<User>('User').findById(session.userId);
@@ -137,8 +185,6 @@ export class AuthService {
       .findOne({ userId: session.userId })
       .sort({ createdAt: 1 });
     if (!user || !membership) throw new UnauthorizedException('Account unavailable');
-    session.revokedAt = new Date();
-    await session.save();
     const organization = await this.database
       .getModel<Organization>('Organization')
       .findById(membership.organizationId)
@@ -164,7 +210,14 @@ export class AuthService {
       .findOne({ email: email.trim().toLowerCase() });
     if (user) {
       const resetToken = await this.createOneTimeToken(user._id.toString(), 'reset-password');
-      this.deliverDevelopmentLink('password reset', resetToken);
+      try {
+        await this.email.sendPasswordReset(user.email, user.name, resetToken);
+      } catch (error) {
+        await this.database.getModel<OneTimeToken>('OneTimeToken').deleteOne({
+          tokenHash: tokenHash(resetToken),
+        });
+        throw error;
+      }
     }
     return { message: 'If an account exists for that email, reset instructions will be sent.' };
   }
@@ -178,6 +231,22 @@ export class AuthService {
     await this.database
       .getModel<RefreshSession>('RefreshSession')
       .updateMany({ userId: record.userId, revokedAt: null }, { revokedAt: new Date() });
+    const memberships = await this.database
+      .getModel<Membership>('Membership')
+      .find({ userId: record.userId })
+      .select('organizationId')
+      .lean();
+    await Promise.all(
+      memberships.map((membership) =>
+        this.audit.record({
+          organizationId: membership.organizationId.toString(),
+          actorId: record.userId.toString(),
+          action: 'auth.password_reset',
+          targetType: 'user',
+          targetId: record.userId.toString(),
+        }),
+      ),
+    );
     return { message: 'Password updated successfully.' };
   }
 
@@ -186,6 +255,22 @@ export class AuthService {
     await this.database
       .getModel<User>('User')
       .updateOne({ _id: record.userId }, { emailVerifiedAt: new Date() });
+    const memberships = await this.database
+      .getModel<Membership>('Membership')
+      .find({ userId: record.userId })
+      .select('organizationId')
+      .lean();
+    await Promise.all(
+      memberships.map((membership) =>
+        this.audit.record({
+          organizationId: membership.organizationId.toString(),
+          actorId: record.userId.toString(),
+          action: 'auth.email_verified',
+          targetType: 'user',
+          targetId: record.userId.toString(),
+        }),
+      ),
+    );
     return { message: 'Email verified successfully.' };
   }
 
@@ -220,8 +305,14 @@ export class AuthService {
       { $setOnInsert: { role: invitation.role } },
       { upsert: true },
     );
-    invitation.acceptedAt = new Date();
-    await invitation.save();
+    const accepted = await this.database.getModel<Invitation>('Invitation').findOneAndUpdate(
+      { _id: invitation._id, acceptedAt: null, expiresAt: { $gt: new Date() } },
+      { $set: { acceptedAt: new Date() } },
+      { new: true },
+    );
+    if (!accepted) {
+      throw new UnauthorizedException('Invitation is invalid or has already been accepted');
+    }
     const organization = await this.database
       .getModel<Organization>('Organization')
       .findById(invitation.organizationId)
@@ -253,7 +344,7 @@ export class AuthService {
       throw new ConflictException('This user is already a member of the organization');
     }
     const token = randomBytes(32).toString('base64url');
-    await this.database.getModel<Invitation>('Invitation').findOneAndUpdate(
+    const invitation = await this.database.getModel<Invitation>('Invitation').findOneAndUpdate(
       { organizationId, email: email.trim().toLowerCase(), acceptedAt: null },
       {
         role,
@@ -263,7 +354,14 @@ export class AuthService {
       },
       { upsert: true, new: true, setDefaultsOnInsert: true },
     );
-    this.deliverDevelopmentLink('organization invitation', token);
+    try {
+      await this.email.sendInvitation(email.trim().toLowerCase(), token);
+    } catch (error) {
+      await this.database.getModel<Invitation>('Invitation').deleteOne({
+        _id: invitation?._id,
+      });
+      throw error;
+    }
     return {
       message: 'Invitation created.',
       ...(process.env.NODE_ENV !== 'production' ? { invitationToken: token } : {}),
@@ -331,13 +429,4 @@ export class AuthService {
     };
   }
 
-  private deliverDevelopmentLink(kind: string, token: string): void {
-    if (process.env.NODE_ENV === 'production') {
-      this.logger.warn(
-        `No production email adapter configured; ${kind} delivery is unavailable`,
-      );
-      return;
-    }
-    this.logger.log(`Development-only ${kind} token: ${token}`);
-  }
 }

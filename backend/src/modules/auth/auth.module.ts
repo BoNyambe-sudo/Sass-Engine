@@ -1,12 +1,15 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { AccessTokenGuard, RolesGuard } from './auth.context.js';
+import { EmailModule } from '../email/email.module.js';
 
+@Global()
 @Module({
   imports: [
+    EmailModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

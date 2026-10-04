@@ -1,4 +1,4 @@
-:host {
+app-root {
   display: block;
   min-height: 100vh;
   color: #20212a;
@@ -58,7 +58,7 @@ button { cursor: pointer; }
 .auth-panel { display: grid; place-items: center; padding: 56px 7%; }
 .auth-box { width: min(100%, 420px); }
 .auth-box > .eyebrow { margin: 0 0 11px; color: var(--purple); }
-.auth-box h2 { margin: 0; font-size: 25px; font-weight: 650; letter-spacing: -.9px; }
+.auth-box h1 { margin: 0; font-size: 25px; font-weight: 650; letter-spacing: -.9px; }
 .auth-box > p { margin: 9px 0 27px; font-size: 13px; }
 .auth-box form { display: flex; flex-direction: column; }
 .auth-box label, .settings-panel label { margin: 17px 0 8px; color: #444550; font-size: 12px; font-weight: 650; }
@@ -184,6 +184,7 @@ button { cursor: pointer; }
 .invite-form select { width: 108px; height: 36px; padding: 0 8px; font-size: 11px; }
 .invite-form .button { min-height: 36px; padding: 0 11px; font-size: 10px; }
 .table-panel { padding: 0; }
+.pending-panel { margin-top: 15px; }
 .table-heading { align-items: center; padding: 17px 18px; }
 .table-scroll { width: 100%; overflow-x: auto; border-top: 1px solid var(--border); }
 table { width: 100%; border-collapse: collapse; text-align: left; }

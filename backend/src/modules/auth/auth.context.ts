@@ -64,10 +64,13 @@ export class AccessTokenGuard implements CanActivate {
     const user = await this.database
       .getModel<User>('User')
       .findById(payload.sub)
-      .select('_id email')
+      .select('_id email emailVerifiedAt')
       .lean();
     if (!user) {
       throw new UnauthorizedException('Account no longer exists');
+    }
+    if (!user.emailVerifiedAt) {
+      throw new ForbiddenException('Verify your email before using this workspace');
     }
 
     const requestedOrganization = request.headers['x-organization-id'];

@@ -19,7 +19,20 @@ export class AuditService {
     await this.database.getModel<AuditLog>('AuditLog').create({
       ...entry,
       targetId: entry.targetId ?? null,
-      metadata: entry.metadata ?? {},
+      metadata: this.redact(entry.metadata ?? {}),
     });
+  }
+
+  private redact(metadata: Record<string, unknown>): Record<string, unknown> {
+    return Object.fromEntries(
+      Object.entries(metadata)
+        .filter(([key]) => !/(password|token|secret|authorization|cookie)/i.test(key))
+        .map(([key, value]) => [
+          key,
+          key.toLowerCase() === 'email' && typeof value === 'string'
+            ? value.replace(/^(.).+(@.+)$/, '$1***$2')
+            : value,
+        ]),
+    );
   }
 }

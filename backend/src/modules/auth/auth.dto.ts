@@ -13,8 +13,11 @@ export class RegisterDto {
   email!: string;
 
   @IsNotEmpty()
+  @IsString()
+  @Length(1, 120)
   name!: string;
 
+  @IsString()
   @MinLength(12)
   password!: string;
 
@@ -28,7 +31,8 @@ export class LoginDto {
   @IsEmail()
   email!: string;
 
-  @IsNotEmpty()
+  @IsString()
+  @MinLength(1)
   password!: string;
 }
 
@@ -44,14 +48,17 @@ export class TokenDto {
 }
 
 export class ResetPasswordDto extends TokenDto {
+  @IsString()
   @MinLength(12)
   password!: string;
 }
 
 export class AcceptInvitationDto extends TokenDto {
+  @IsString()
   @MinLength(12)
   password!: string;
 
+  @IsString()
   @Length(1, 120)
   name!: string;
 }
