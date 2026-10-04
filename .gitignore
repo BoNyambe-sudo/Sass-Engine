@@ -1,24 +1,36 @@
-# Compiled output
-/dist
-/tmp
-/out-tsc
-/bazel-out
+# NEW
 
-coverage/
-.angular/
-.env
-.env.*
-!.env.example
-*.log
-.DS_Store
-
-# Node
-node_modules
+#Dependencies
+node_modules/
+.pnp/
+.pnp.js
 npm-debug.log
 yarn-error.log
 
-# IDEs and editors
+#Build outputs
+dist/
+**/dist/
+build/
+**/build/
+*.tsbuildinfo
+
+#Prisma
+.prisma/
+prisma/migrations/
+
+#Agent / AI cruft
+.agents/
+**/.agents/
+.claude/
+.cursor/
+.devin/
+
+
+#IDE
+.vscode/
+**/.vscode/
 .idea/
+*.code-workspace
 .project
 .classpath
 .c9/
@@ -26,11 +38,20 @@ yarn-error.log
 .settings/
 *.sublime-workspace
 
-# Visual Studio Code
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/mcp.json
-.history/*
+#Env & OS
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
+
+
+# Compiled output
+**/dist/
+**/tmp
+**/out-tsc
+**/bazel-out
+
+coverage/
+**/.angular/

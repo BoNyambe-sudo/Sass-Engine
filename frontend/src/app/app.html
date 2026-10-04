@@ -1,344 +1,195 @@
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * The content below * * * * * * * * * * * -->
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
-<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * Delete the template below * * * * * * * * * -->
-<!-- * * * * * * * to get started with your project! * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-
-<style>
-  :host {
-    --bright-blue: oklch(51.01% 0.274 263.83);
-    --electric-violet: oklch(53.18% 0.28 296.97);
-    --french-violet: oklch(47.66% 0.246 305.88);
-    --vivid-pink: oklch(69.02% 0.277 332.77);
-    --hot-red: oklch(61.42% 0.238 15.34);
-    --orange-red: oklch(63.32% 0.24 31.68);
-
-    --gray-900: oklch(19.37% 0.006 300.98);
-    --gray-700: oklch(36.98% 0.014 302.71);
-    --gray-400: oklch(70.9% 0.015 304.04);
-
-    --red-to-pink-to-purple-vertical-gradient: linear-gradient(
-      180deg,
-      var(--orange-red) 0%,
-      var(--vivid-pink) 50%,
-      var(--electric-violet) 100%
-    );
-
-    --red-to-pink-to-purple-horizontal-gradient: linear-gradient(
-      90deg,
-      var(--orange-red) 0%,
-      var(--vivid-pink) 50%,
-      var(--electric-violet) 100%
-    );
-
-    --pill-accent: var(--bright-blue);
-
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-      "Segoe UI Symbol";
-    box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    display: block;
-    height: 100dvh;
-  }
-
-  h1 {
-    font-size: 3.125rem;
-    color: var(--gray-900);
-    font-weight: 500;
-    line-height: 100%;
-    letter-spacing: -0.125rem;
-    margin: 0;
-    font-family: "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-      "Segoe UI Symbol";
-  }
-
-  p {
-    margin: 0;
-    color: var(--gray-700);
-  }
-
-  main {
-    width: 100%;
-    min-height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem;
-    box-sizing: inherit;
-    position: relative;
-  }
-
-  .angular-logo {
-    max-width: 9.2rem;
-  }
-
-  .content {
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
-    max-width: 700px;
-    margin-bottom: 3rem;
-  }
-
-  .content h1 {
-    margin-top: 1.75rem;
-  }
-
-  .content p {
-    margin-top: 1.5rem;
-  }
-
-  .divider {
-    width: 1px;
-    background: var(--red-to-pink-to-purple-vertical-gradient);
-    margin-inline: 0.5rem;
-  }
-
-  .pill-group {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    flex-wrap: wrap;
-    gap: 1.25rem;
-  }
-
-  .pill {
-    display: flex;
-    align-items: center;
-    --pill-accent: var(--bright-blue);
-    background: color-mix(in srgb, var(--pill-accent) 5%, transparent);
-    color: var(--pill-accent);
-    padding-inline: 0.75rem;
-    padding-block: 0.375rem;
-    border-radius: 2.75rem;
-    border: 0;
-    transition: background 0.3s ease;
-    font-family: var(--inter-font);
-    font-size: 0.875rem;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 1.4rem;
-    letter-spacing: -0.00875rem;
-    text-decoration: none;
-    white-space: nowrap;
-  }
-
-  .pill:hover {
-    background: color-mix(in srgb, var(--pill-accent) 15%, transparent);
-  }
-
-  .pill-group .pill:nth-child(6n + 1) {
-    --pill-accent: var(--bright-blue);
-  }
-  .pill-group .pill:nth-child(6n + 2) {
-    --pill-accent: var(--electric-violet);
-  }
-  .pill-group .pill:nth-child(6n + 3) {
-    --pill-accent: var(--french-violet);
-  }
-
-  .pill-group .pill:nth-child(6n + 4),
-  .pill-group .pill:nth-child(6n + 5),
-  .pill-group .pill:nth-child(6n + 6) {
-    --pill-accent: var(--hot-red);
-  }
-
-  .pill-group svg {
-    margin-inline-start: 0.25rem;
-  }
-
-  .social-links {
-    display: flex;
-    align-items: center;
-    gap: 0.73rem;
-    margin-top: 1.5rem;
-  }
-
-  .social-links path {
-    transition: fill 0.3s ease;
-    fill: var(--gray-400);
-  }
-
-  .social-links a:hover svg path {
-    fill: var(--gray-900);
-  }
-
-  @media screen and (max-width: 650px) {
-    .content {
-      flex-direction: column;
-      width: max-content;
-    }
-
-    .divider {
-      height: 1px;
-      width: 100%;
-      background: var(--red-to-pink-to-purple-horizontal-gradient);
-      margin-block: 1.5rem;
-    }
-  }
-</style>
-
-<main class="main">
-  <div class="content">
-    <div class="left-side">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 982 239"
-        fill="none"
-        class="angular-logo"
-      >
-        <g clip-path="url(#a)">
-          <path
-            fill="url(#b)"
-            d="M388.676 191.625h30.849L363.31 31.828h-35.758l-56.215 159.797h30.848l13.174-39.356h60.061l13.256 39.356Zm-65.461-62.675 21.602-64.311h1.227l21.602 64.311h-44.431Zm126.831-7.527v70.202h-28.23V71.839h27.002v20.374h1.392c2.782-6.71 7.2-12.028 13.255-15.956 6.056-3.927 13.584-5.89 22.503-5.89 8.264 0 15.465 1.8 21.684 5.318 6.137 3.518 10.964 8.673 14.319 15.382 3.437 6.71 5.074 14.81 4.992 24.383v76.175h-28.23v-71.92c0-8.019-2.046-14.237-6.219-18.819-4.173-4.5-9.819-6.791-17.102-6.791-4.91 0-9.328 1.063-13.174 3.272-3.846 2.128-6.792 5.237-9.001 9.328-2.046 4.009-3.191 8.918-3.191 14.728ZM589.233 239c-10.147 0-18.82-1.391-26.103-4.091-7.282-2.7-13.092-6.382-17.511-10.964-4.418-4.582-7.528-9.655-9.164-15.219l25.448-6.136c1.145 2.372 2.782 4.663 4.991 6.954 2.209 2.291 5.155 4.255 8.837 5.81 3.683 1.554 8.428 2.291 14.074 2.291 8.019 0 14.647-1.964 19.884-5.81 5.237-3.845 7.856-10.227 7.856-19.064v-22.665h-1.391c-1.473 2.946-3.601 5.892-6.383 9.001-2.782 3.109-6.464 5.645-10.965 7.691-4.582 2.046-10.228 3.109-17.101 3.109-9.165 0-17.511-2.209-25.039-6.545-7.446-4.337-13.42-10.883-17.757-19.474-4.418-8.673-6.628-19.473-6.628-32.565 0-13.091 2.21-24.301 6.628-33.383 4.419-9.082 10.311-15.955 17.839-20.7 7.528-4.746 15.874-7.037 25.039-7.037 7.037 0 12.846 1.145 17.347 3.518 4.582 2.373 8.182 5.236 10.883 8.51 2.7 3.272 4.746 6.382 6.137 9.327h1.554v-19.8h27.821v121.749c0 10.228-2.454 18.737-7.364 25.447-4.91 6.709-11.538 11.7-20.048 15.055-8.509 3.355-18.165 4.991-28.884 4.991Zm.245-71.266c5.974 0 11.047-1.473 15.302-4.337 4.173-2.945 7.446-7.118 9.573-12.519 2.21-5.482 3.274-12.027 3.274-19.637 0-7.609-1.064-14.155-3.274-19.8-2.127-5.646-5.318-10.064-9.491-13.255-4.174-3.11-9.329-4.746-15.384-4.746s-11.537 1.636-15.792 4.91c-4.173 3.272-7.365 7.772-9.492 13.418-2.128 5.727-3.191 12.191-3.191 19.392 0 7.2 1.063 13.745 3.273 19.228 2.127 5.482 5.318 9.736 9.573 12.764 4.174 3.027 9.41 4.582 15.629 4.582Zm141.56-26.51V71.839h28.23v119.786h-27.412v-21.273h-1.227c-2.7 6.709-7.119 12.191-13.338 16.446-6.137 4.255-13.747 6.382-22.748 6.382-7.855 0-14.81-1.718-20.783-5.237-5.974-3.518-10.72-8.591-14.075-15.382-3.355-6.709-5.073-14.891-5.073-24.464V71.839h28.312v71.921c0 7.609 2.046 13.664 6.219 18.083 4.173 4.5 9.655 6.709 16.365 6.709 4.173 0 8.183-.982 12.111-3.028 3.927-2.045 7.118-5.072 9.655-9.082 2.537-4.091 3.764-9.164 3.764-15.218Zm65.707-109.395v159.796h-28.23V31.828h28.23Zm44.841 162.169c-7.61 0-14.402-1.391-20.457-4.091-6.055-2.7-10.883-6.791-14.32-12.109-3.518-5.319-5.237-11.946-5.237-19.801 0-6.791 1.228-12.355 3.765-16.773 2.536-4.419 5.891-7.937 10.228-10.637 4.337-2.618 9.164-4.664 14.647-6.055 5.4-1.391 11.046-2.373 16.856-3.027 7.037-.737 12.683-1.391 17.102-1.964 4.337-.573 7.528-1.555 9.574-2.782 1.963-1.309 3.027-3.273 3.027-5.973v-.491c0-5.891-1.718-10.391-5.237-13.664-3.518-3.191-8.51-4.828-15.056-4.828-6.955 0-12.356 1.473-16.447 4.5-4.009 3.028-6.71 6.546-8.183 10.719l-26.348-3.764c2.046-7.282 5.483-13.336 10.31-18.328 4.746-4.909 10.638-8.59 17.511-11.045 6.955-2.455 14.565-3.682 22.912-3.682 5.809 0 11.537.654 17.265 2.045s10.965 3.6 15.711 6.71c4.746 3.109 8.51 7.282 11.455 12.6 2.864 5.318 4.337 11.946 4.337 19.883v80.184h-27.166v-16.446h-.9c-1.719 3.355-4.092 6.464-7.201 9.328-3.109 2.864-6.955 5.237-11.619 6.955-4.828 1.718-10.229 2.536-16.529 2.536Zm7.364-20.701c5.646 0 10.556-1.145 14.729-3.354 4.173-2.291 7.364-5.237 9.655-9.001 2.292-3.763 3.355-7.854 3.355-12.273v-14.155c-.9.737-2.373 1.391-4.5 2.046-2.128.654-4.419 1.145-7.037 1.636-2.619.491-5.155.9-7.692 1.227-2.537.328-4.746.655-6.628.901-4.173.572-8.019 1.472-11.292 2.781-3.355 1.31-5.973 3.11-7.855 5.401-1.964 2.291-2.864 5.318-2.864 8.918 0 5.237 1.882 9.164 5.728 11.782 3.682 2.782 8.51 4.091 14.401 4.091Zm64.643 18.328V71.839h27.412v19.965h1.227c2.21-6.955 5.974-12.274 11.292-16.038 5.319-3.763 11.456-5.645 18.329-5.645 1.555 0 3.355.082 5.237.163 1.964.164 3.601.328 4.91.573v25.938c-1.227-.41-3.109-.819-5.646-1.146a58.814 58.814 0 0 0-7.446-.49c-5.155 0-9.738 1.145-13.829 3.354-4.091 2.209-7.282 5.236-9.655 9.164-2.373 3.927-3.519 8.427-3.519 13.5v70.448h-28.312ZM222.077 39.192l-8.019 125.923L137.387 0l84.69 39.192Zm-53.105 162.825-57.933 33.056-57.934-33.056 11.783-28.556h92.301l11.783 28.556ZM111.039 62.675l30.357 73.803H80.681l30.358-73.803ZM7.937 165.115 0 39.192 84.69 0 7.937 165.115Z"
-          />
-          <path
-            fill="url(#c)"
-            d="M388.676 191.625h30.849L363.31 31.828h-35.758l-56.215 159.797h30.848l13.174-39.356h60.061l13.256 39.356Zm-65.461-62.675 21.602-64.311h1.227l21.602 64.311h-44.431Zm126.831-7.527v70.202h-28.23V71.839h27.002v20.374h1.392c2.782-6.71 7.2-12.028 13.255-15.956 6.056-3.927 13.584-5.89 22.503-5.89 8.264 0 15.465 1.8 21.684 5.318 6.137 3.518 10.964 8.673 14.319 15.382 3.437 6.71 5.074 14.81 4.992 24.383v76.175h-28.23v-71.92c0-8.019-2.046-14.237-6.219-18.819-4.173-4.5-9.819-6.791-17.102-6.791-4.91 0-9.328 1.063-13.174 3.272-3.846 2.128-6.792 5.237-9.001 9.328-2.046 4.009-3.191 8.918-3.191 14.728ZM589.233 239c-10.147 0-18.82-1.391-26.103-4.091-7.282-2.7-13.092-6.382-17.511-10.964-4.418-4.582-7.528-9.655-9.164-15.219l25.448-6.136c1.145 2.372 2.782 4.663 4.991 6.954 2.209 2.291 5.155 4.255 8.837 5.81 3.683 1.554 8.428 2.291 14.074 2.291 8.019 0 14.647-1.964 19.884-5.81 5.237-3.845 7.856-10.227 7.856-19.064v-22.665h-1.391c-1.473 2.946-3.601 5.892-6.383 9.001-2.782 3.109-6.464 5.645-10.965 7.691-4.582 2.046-10.228 3.109-17.101 3.109-9.165 0-17.511-2.209-25.039-6.545-7.446-4.337-13.42-10.883-17.757-19.474-4.418-8.673-6.628-19.473-6.628-32.565 0-13.091 2.21-24.301 6.628-33.383 4.419-9.082 10.311-15.955 17.839-20.7 7.528-4.746 15.874-7.037 25.039-7.037 7.037 0 12.846 1.145 17.347 3.518 4.582 2.373 8.182 5.236 10.883 8.51 2.7 3.272 4.746 6.382 6.137 9.327h1.554v-19.8h27.821v121.749c0 10.228-2.454 18.737-7.364 25.447-4.91 6.709-11.538 11.7-20.048 15.055-8.509 3.355-18.165 4.991-28.884 4.991Zm.245-71.266c5.974 0 11.047-1.473 15.302-4.337 4.173-2.945 7.446-7.118 9.573-12.519 2.21-5.482 3.274-12.027 3.274-19.637 0-7.609-1.064-14.155-3.274-19.8-2.127-5.646-5.318-10.064-9.491-13.255-4.174-3.11-9.329-4.746-15.384-4.746s-11.537 1.636-15.792 4.91c-4.173 3.272-7.365 7.772-9.492 13.418-2.128 5.727-3.191 12.191-3.191 19.392 0 7.2 1.063 13.745 3.273 19.228 2.127 5.482 5.318 9.736 9.573 12.764 4.174 3.027 9.41 4.582 15.629 4.582Zm141.56-26.51V71.839h28.23v119.786h-27.412v-21.273h-1.227c-2.7 6.709-7.119 12.191-13.338 16.446-6.137 4.255-13.747 6.382-22.748 6.382-7.855 0-14.81-1.718-20.783-5.237-5.974-3.518-10.72-8.591-14.075-15.382-3.355-6.709-5.073-14.891-5.073-24.464V71.839h28.312v71.921c0 7.609 2.046 13.664 6.219 18.083 4.173 4.5 9.655 6.709 16.365 6.709 4.173 0 8.183-.982 12.111-3.028 3.927-2.045 7.118-5.072 9.655-9.082 2.537-4.091 3.764-9.164 3.764-15.218Zm65.707-109.395v159.796h-28.23V31.828h28.23Zm44.841 162.169c-7.61 0-14.402-1.391-20.457-4.091-6.055-2.7-10.883-6.791-14.32-12.109-3.518-5.319-5.237-11.946-5.237-19.801 0-6.791 1.228-12.355 3.765-16.773 2.536-4.419 5.891-7.937 10.228-10.637 4.337-2.618 9.164-4.664 14.647-6.055 5.4-1.391 11.046-2.373 16.856-3.027 7.037-.737 12.683-1.391 17.102-1.964 4.337-.573 7.528-1.555 9.574-2.782 1.963-1.309 3.027-3.273 3.027-5.973v-.491c0-5.891-1.718-10.391-5.237-13.664-3.518-3.191-8.51-4.828-15.056-4.828-6.955 0-12.356 1.473-16.447 4.5-4.009 3.028-6.71 6.546-8.183 10.719l-26.348-3.764c2.046-7.282 5.483-13.336 10.31-18.328 4.746-4.909 10.638-8.59 17.511-11.045 6.955-2.455 14.565-3.682 22.912-3.682 5.809 0 11.537.654 17.265 2.045s10.965 3.6 15.711 6.71c4.746 3.109 8.51 7.282 11.455 12.6 2.864 5.318 4.337 11.946 4.337 19.883v80.184h-27.166v-16.446h-.9c-1.719 3.355-4.092 6.464-7.201 9.328-3.109 2.864-6.955 5.237-11.619 6.955-4.828 1.718-10.229 2.536-16.529 2.536Zm7.364-20.701c5.646 0 10.556-1.145 14.729-3.354 4.173-2.291 7.364-5.237 9.655-9.001 2.292-3.763 3.355-7.854 3.355-12.273v-14.155c-.9.737-2.373 1.391-4.5 2.046-2.128.654-4.419 1.145-7.037 1.636-2.619.491-5.155.9-7.692 1.227-2.537.328-4.746.655-6.628.901-4.173.572-8.019 1.472-11.292 2.781-3.355 1.31-5.973 3.11-7.855 5.401-1.964 2.291-2.864 5.318-2.864 8.918 0 5.237 1.882 9.164 5.728 11.782 3.682 2.782 8.51 4.091 14.401 4.091Zm64.643 18.328V71.839h27.412v19.965h1.227c2.21-6.955 5.974-12.274 11.292-16.038 5.319-3.763 11.456-5.645 18.329-5.645 1.555 0 3.355.082 5.237.163 1.964.164 3.601.328 4.91.573v25.938c-1.227-.41-3.109-.819-5.646-1.146a58.814 58.814 0 0 0-7.446-.49c-5.155 0-9.738 1.145-13.829 3.354-4.091 2.209-7.282 5.236-9.655 9.164-2.373 3.927-3.519 8.427-3.519 13.5v70.448h-28.312ZM222.077 39.192l-8.019 125.923L137.387 0l84.69 39.192Zm-53.105 162.825-57.933 33.056-57.934-33.056 11.783-28.556h92.301l11.783 28.556ZM111.039 62.675l30.357 73.803H80.681l30.358-73.803ZM7.937 165.115 0 39.192 84.69 0 7.937 165.115Z"
-          />
-        </g>
-        <defs>
-          <radialGradient
-            id="c"
-            cx="0"
-            cy="0"
-            r="1"
-            gradientTransform="rotate(118.122 171.182 60.81) scale(205.794)"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop stop-color="#FF41F8" />
-            <stop offset=".707" stop-color="#FF41F8" stop-opacity=".5" />
-            <stop offset="1" stop-color="#FF41F8" stop-opacity="0" />
-          </radialGradient>
-          <linearGradient
-            id="b"
-            x1="0"
-            x2="982"
-            y1="192"
-            y2="192"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop stop-color="#F0060B" />
-            <stop offset="0" stop-color="#F0070C" />
-            <stop offset=".526" stop-color="#CC26D5" />
-            <stop offset="1" stop-color="#7702FF" />
-          </linearGradient>
-          <clipPath id="a"><path fill="#fff" d="M0 0h982v239H0z" /></clipPath>
-        </defs>
-      </svg>
-      <h1>Hello, {{ title() }}</h1>
-      <p>Congratulations! Your app is running. 🎉</p>
-    </div>
-    <div class="divider" role="separator" aria-label="Divider"></div>
-    <div class="right-side">
-      <div class="pill-group">
-        @for (item of [
-          { title: 'Explore the Docs', link: 'https://angular.dev' },
-          { title: 'Learn with Tutorials', link: 'https://angular.dev/tutorials' },
-          { title: 'Prompt and best practices for AI', link: 'https://angular.dev/ai/develop-with-ai'},
-          { title: 'CLI Docs', link: 'https://angular.dev/tools/cli' },
-          { title: 'Angular Language Service', link: 'https://angular.dev/tools/language-service' },
-          { title: 'Angular DevTools', link: 'https://angular.dev/tools/devtools' },
-        ]; track item.title) {
-          <a
-            class="pill"
-            [href]="item.link"
-            target="_blank"
-            rel="noopener"
-          >
-            <span>{{ item.title }}</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="14"
-              viewBox="0 -960 960 960"
-              width="14"
-              fill="currentColor"
-            >
-              <path
-                d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"
-              />
-            </svg>
-          </a>
-        }
+<main class="app-frame" [class.dark-theme]="theme() === 'dark'">
+  @if (loading()) {
+    <section class="boot-screen" aria-label="Loading workspace">
+      <span class="brand-mark">S</span>
+      <span class="loading-line"></span>
+    </section>
+  } @else if (!session()) {
+    <section class="auth-layout">
+      <div class="auth-story">
+        <a class="wordmark" href="/" aria-label="Northstar home">
+          <span class="brand-mark">S</span><span>Northstar</span>
+        </a>
+        <div class="story-copy">
+          <span class="eyebrow">THE GROWTH OPERATING SYSTEM</span>
+          <h1>Turn your numbers<br />into your next move.</h1>
+          <p>One clear view of your customers, revenue, and the people building what comes next.</p>
+        </div>
+        <div class="story-foot"><span class="status-dot"></span> Your workspace, in focus</div>
       </div>
-      <div class="social-links">
-        <a
-          href="https://github.com/angular/angular"
-          aria-label="Github"
-          target="_blank"
-          rel="noopener"
-        >
-          <svg
-            width="25"
-            height="24"
-            viewBox="0 0 25 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            alt="Github"
-          >
-            <path
-              d="M12.3047 0C5.50634 0 0 5.50942 0 12.3047C0 17.7423 3.52529 22.3535 8.41332 23.9787C9.02856 24.0946 9.25414 23.7142 9.25414 23.3871C9.25414 23.0949 9.24389 22.3207 9.23876 21.2953C5.81601 22.0377 5.09414 19.6444 5.09414 19.6444C4.53427 18.2243 3.72524 17.8449 3.72524 17.8449C2.61064 17.082 3.81137 17.0973 3.81137 17.0973C5.04697 17.1835 5.69604 18.3647 5.69604 18.3647C6.79321 20.2463 8.57636 19.7029 9.27978 19.3881C9.39052 18.5924 9.70736 18.0499 10.0591 17.7423C7.32641 17.4347 4.45429 16.3765 4.45429 11.6618C4.45429 10.3185 4.9311 9.22133 5.72065 8.36C5.58222 8.04931 5.16694 6.79833 5.82831 5.10337C5.82831 5.10337 6.85883 4.77319 9.2121 6.36459C10.1965 6.09082 11.2424 5.95546 12.2883 5.94931C13.3342 5.95546 14.3801 6.09082 15.3644 6.36459C17.7023 4.77319 18.7328 5.10337 18.7328 5.10337C19.3942 6.79833 18.9789 8.04931 18.8559 8.36C19.6403 9.22133 20.1171 10.3185 20.1171 11.6618C20.1171 16.3888 17.2409 17.4296 14.5031 17.7321C14.9338 18.1012 15.3337 18.8559 15.3337 20.0084C15.3337 21.6552 15.3183 22.978 15.3183 23.3779C15.3183 23.7009 15.5336 24.0854 16.1642 23.9623C21.0871 22.3484 24.6094 17.7341 24.6094 12.3047C24.6094 5.50942 19.0999 0 12.3047 0Z"
-            />
-          </svg>
-        </a>
-        <a
-          href="https://x.com/angular"
-          aria-label="X"
-          target="_blank"
-          rel="noopener"
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            alt="X"
-          >
-            <path
-              d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
-            />
-          </svg>
-        </a>
-        <a
-          href="https://www.youtube.com/channel/UCbn1OgGei-DV7aSRo_HaAiw"
-          aria-label="Youtube"
-          target="_blank"
-          rel="noopener"
-        >
-          <svg
-            width="29"
-            height="20"
-            viewBox="0 0 29 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            alt="Youtube"
-          >
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M27.4896 1.52422C27.9301 1.96749 28.2463 2.51866 28.4068 3.12258C29.0004 5.35161 29.0004 10 29.0004 10C29.0004 10 29.0004 14.6484 28.4068 16.8774C28.2463 17.4813 27.9301 18.0325 27.4896 18.4758C27.0492 18.9191 26.5 19.2389 25.8972 19.4032C23.6778 20 14.8068 20 14.8068 20C14.8068 20 5.93586 20 3.71651 19.4032C3.11363 19.2389 2.56449 18.9191 2.12405 18.4758C1.68361 18.0325 1.36732 17.4813 1.20683 16.8774C0.613281 14.6484 0.613281 10 0.613281 10C0.613281 10 0.613281 5.35161 1.20683 3.12258C1.36732 2.51866 1.68361 1.96749 2.12405 1.52422C2.56449 1.08095 3.11363 0.76113 3.71651 0.596774C5.93586 0 14.8068 0 14.8068 0C14.8068 0 23.6778 0 25.8972 0.596774C26.5 0.76113 27.0492 1.08095 27.4896 1.52422ZM19.3229 10L11.9036 5.77905V14.221L19.3229 10Z"
-            />
-          </svg>
-        </a>
+      <div class="auth-panel">
+        <div class="auth-box">
+          <div class="mobile-mark"><span class="brand-mark">S</span><span>Northstar</span></div>
+          <span class="eyebrow">{{ authMode() === 'login' ? 'WELCOME BACK' : 'GET STARTED' }}</span>
+          <h2>{{ authMode() === 'login' ? 'Sign in to your account' : 'Create your workspace' }}</h2>
+          <p class="muted">{{ authMode() === 'login' ? 'Pick up right where your team left off.' : 'A clear view of growth starts here.' }}</p>
+          @if (error()) { <div class="alert alert-error" role="alert">{{ error() }}</div> }
+          @if (notice()) { <div class="alert alert-success" role="status">{{ notice() }}</div> }
+          <form (ngSubmit)="submitAuth()" #authForm="ngForm">
+            @if (authMode() === 'signup') {
+              <label for="full-name">Your name</label>
+              <input id="full-name" name="fullName" [(ngModel)]="fullName" autocomplete="name" required maxlength="120" />
+              <label for="workspace-name">Workspace name</label>
+              <input id="workspace-name" name="organizationName" [(ngModel)]="organizationName" autocomplete="organization" required maxlength="120" />
+            }
+            <label for="email">Work email</label>
+            <input id="email" name="email" type="email" [(ngModel)]="email" autocomplete="email" required />
+            <div class="label-row"><label for="password">Password</label>
+              @if (authMode() === 'login') {
+                <button type="button" class="text-button" (click)="forgotPassword()">Forgot password?</button>
+              }
+            </div>
+            <input id="password" name="password" type="password" [(ngModel)]="password" [attr.autocomplete]="authMode() === 'login' ? 'current-password' : 'new-password'" [minlength]="12" required />
+            @if (authMode() === 'signup') { <span class="field-hint">Use at least 12 characters.</span> }
+            <button class="button button-primary auth-submit" type="submit" [disabled]="busy() || authForm.invalid">
+              {{ busy() ? 'Please wait…' : authMode() === 'login' ? 'Sign in' : 'Create workspace' }}
+              @if (!busy()) { <span aria-hidden="true">→</span> }
+            </button>
+          </form>
+          <p class="auth-switch">
+            {{ authMode() === 'login' ? 'New to Northstar?' : 'Already have an account?' }}
+            <button type="button" class="text-button" (click)="toggleAuthMode()">
+              {{ authMode() === 'login' ? 'Create an account' : 'Sign in' }}
+            </button>
+          </p>
+          <p class="auth-legal">By continuing, you agree to our <a href="#terms">Terms</a> and <a href="#privacy">Privacy Policy</a>.</p>
+        </div>
       </div>
+    </section>
+  } @else {
+    <div class="workspace">
+      <aside class="sidebar">
+        <a class="wordmark sidebar-brand" href="/" aria-label="Northstar dashboard">
+          <span class="brand-mark">S</span><span>Northstar</span>
+        </a>
+        <button class="workspace-switcher" (click)="selectSection('settings')" aria-label="Open workspace settings">
+          <span class="workspace-avatar">{{ organization()?.name?.slice(0, 1) ?? 'W' }}</span>
+          <span class="workspace-name"><strong>{{ organization()?.name ?? session()?.organization.name }}</strong><small>Growth workspace</small></span>
+          <span class="switch-caret" aria-hidden="true">⌄</span>
+        </button>
+        <span class="nav-caption">WORKSPACE</span>
+        <nav aria-label="Main navigation">
+          <button class="nav-item" [class.active]="activeSection() === 'overview'" (click)="selectSection('overview')"><span class="nav-icon">◫</span> Overview</button>
+          <button class="nav-item" [class.active]="activeSection() === 'members'" (click)="selectSection('members')"><span class="nav-icon">♧</span> Members</button>
+          <button class="nav-item" [class.active]="activeSection() === 'billing'" (click)="selectSection('billing')"><span class="nav-icon">◈</span> Billing</button>
+          @if (admin()) {
+            <button class="nav-item" [class.active]="activeSection() === 'audit'" (click)="selectSection('audit')"><span class="nav-icon">≋</span> Audit log</button>
+          }
+        </nav>
+        <div class="sidebar-spacer"></div>
+        <div class="sidebar-help">
+          <span class="help-icon">?</span>
+          <span><strong>Need a hand?</strong><small>Visit our help center</small></span>
+          <span class="external" aria-hidden="true">↗</span>
+        </div>
+        <button class="profile-button" (click)="selectSection('settings')">
+          <span class="avatar">{{ initials() }}</span>
+          <span class="profile-copy"><strong>{{ session()?.user.name }}</strong><small>{{ session()?.role | titlecase }}</small></span>
+          <span class="profile-menu" aria-hidden="true">···</span>
+        </button>
+      </aside>
+
+      <section class="main-column">
+        <header class="topbar">
+          <div class="breadcrumbs"><span>Workspace</span><span class="crumb-separator">/</span><strong>{{ activeSection() === 'overview' ? 'Overview' : activeSection() | titlecase }}</strong></div>
+          <div class="top-actions">
+            <span class="live-status"><span class="status-dot"></span> All systems operational</span>
+            <button class="icon-button theme-button" (click)="toggleTheme()" [attr.aria-label]="theme() === 'light' ? 'Switch to dark theme' : 'Switch to light theme'">{{ theme() === 'light' ? '◐' : '☼' }}</button>
+            <button class="top-avatar" (click)="selectSection('settings')" [attr.aria-label]="'Account settings for ' + session()?.user.name">{{ initials() }}</button>
+          </div>
+        </header>
+
+        <main class="content">
+          @if (error()) { <div class="alert alert-error page-alert" role="alert">{{ error() }}</div> }
+          @if (notice()) { <div class="alert alert-success page-alert" role="status">{{ notice() }}</div> }
+          @if (busy()) { <div class="busy-indicator" role="status">Updating workspace…</div> }
+
+          @if (activeSection() === 'overview') {
+            <section class="page-heading">
+              <div><span class="eyebrow">{{ today | date:'EEEE, MMMM d, y' | uppercase }}</span><h1>Good morning, {{ firstName() }} <span class="wave">✳</span></h1><p>Here's what's happening with your business today.</p></div>
+              <button class="button button-outline" (click)="selectSection('members')"><span aria-hidden="true">＋</span> Invite a teammate</button>
+            </section>
+            @if (overview(); as data) {
+              <section class="metric-grid" aria-label="Growth metrics">
+                <article class="metric-card"><div class="metric-top"><span>Monthly recurring revenue</span><span class="metric-icon violet">$</span></div><strong class="metric-value">{{ formatMoney(data.mrr) }}</strong><span class="metric-foot">Current active subscriptions</span></article>
+                <article class="metric-card"><div class="metric-top"><span>Active subscriptions</span><span class="metric-icon blue">↗</span></div><strong class="metric-value">{{ data.activeSubscriptions | number }}</strong><span class="metric-foot">Across your workspace</span></article>
+                <article class="metric-card"><div class="metric-top"><span>Churn rate</span><span class="metric-icon amber">↘</span></div><strong class="metric-value">{{ data.churn }}<small>%</small></strong><span class="metric-foot">In the last 30 days</span></article>
+                <article class="metric-card"><div class="metric-top"><span>New members</span><span class="metric-icon green">＋</span></div><strong class="metric-value">{{ data.newUsers | number }}</strong><span class="metric-foot">Joined in the last 30 days</span></article>
+              </section>
+              <section class="overview-grid">
+                <article class="panel chart-panel">
+                  <div class="panel-heading"><div><h2>Workspace growth</h2><p>New members joined over the selected period</p></div><span class="period-pill">Last 30 days</span></div>
+                  @if (data.series.newUsers.length) {
+                    <div class="chart" role="img" aria-label="Monthly new member bar chart">
+                      @for (point of data.series.newUsers; track point.date) {
+                        <div class="chart-column"><span class="chart-number">{{ point.value }}</span><div class="chart-track"><span class="chart-bar" [style.height.%]="chartHeight(data, point.value)"></span></div><span class="chart-label">{{ point.date | date:'MMM' }}</span></div>
+                      }
+                    </div>
+                  } @else {
+                    <div class="empty-chart"><span class="empty-graphic">↗</span><strong>Your growth story starts here</strong><span>New member activity will appear as your team grows.</span></div>
+                  }
+                </article>
+                <article class="panel health-panel">
+                  <div class="panel-heading"><div><h2>Workspace health</h2><p>Everything in one place</p></div><span class="health-indicator">LIVE</span></div>
+                  <div class="health-row"><span class="health-symbol">◈</span><span><strong>{{ subscription()?.plan | titlecase }}</strong><small>Current plan</small></span><button class="subtle-link" (click)="selectSection('billing')">Manage <span>→</span></button></div>
+                  <div class="health-row"><span class="health-symbol green-symbol">♧</span><span><strong>{{ organization()?.memberCount ?? 0 }} members</strong><small>Active in this workspace</small></span><button class="subtle-link" (click)="selectSection('members')">View <span>→</span></button></div>
+                  <div class="health-note"><span class="status-dot"></span><span>Your workspace is connected and up to date.</span></div>
+                </article>
+              </section>
+              <section class="bottom-strip"><div><span class="bottom-icon">✳</span><span><strong>A little more clarity goes a long way.</strong><small>Invite your team to see the full picture together.</small></span></div><button class="subtle-link" (click)="selectSection('members')">Invite teammates <span>→</span></button></section>
+            } @else if (!busy()) {
+              <div class="empty-state"><span class="empty-graphic">◫</span><h2>Metrics are getting ready</h2><p>We couldn't load your growth overview. Refresh to try again.</p><button class="button button-outline" (click)="loadSection('overview')">Try again</button></div>
+            }
+          }
+
+          @if (activeSection() === 'members') {
+            <section class="page-heading"><div><span class="eyebrow">YOUR PEOPLE</span><h1>Members</h1><p>Manage the people who have access to your workspace.</p></div><span class="count-pill">{{ members().length }} people</span></section>
+            <section class="panel invite-panel">
+              <div><span class="invite-icon">＋</span><span><h2>Invite a teammate</h2><p>Bring the right people into the conversation.</p></span></div>
+              <form class="invite-form" (ngSubmit)="inviteMember()">
+                <label class="visually-hidden" for="invite-email">Teammate email address</label><input id="invite-email" name="inviteEmail" type="email" placeholder="name@company.com" [(ngModel)]="inviteEmail" required />
+                <label class="visually-hidden" for="invite-role">Workspace role</label><select id="invite-role" name="inviteRole" [(ngModel)]="inviteRole"><option value="VIEWER">Viewer</option><option value="MANAGER">Manager</option>@if (admin()) { <option value="ADMIN">Admin</option> }</select>
+                <button class="button button-primary" type="submit" [disabled]="busy() || !inviteEmail">Send invite <span aria-hidden="true">→</span></button>
+              </form>
+            </section>
+            <section class="panel table-panel"><div class="panel-heading table-heading"><div><h2>Workspace members</h2><p>People with access to this workspace</p></div><button class="button button-quiet" (click)="loadSection('members')">↻ Refresh</button></div>
+              <div class="table-scroll"><table><thead><tr><th>MEMBER</th><th>ROLE</th><th>JOINED</th><th><span class="visually-hidden">Actions</span></th></tr></thead><tbody>
+                @for (member of members(); track member.id) {
+                  <tr><td><div class="member-cell"><span class="avatar member-avatar">{{ memberInitials(member.name) }}</span><span><strong>{{ member.name }}</strong><small>{{ member.email }}</small></span></div></td>
+                    <td>@if (admin()) { <select class="role-select" [ngModel]="member.role" (ngModelChange)="changeRole(member, $event)" [attr.aria-label]="'Role for ' + member.name"><option value="ADMIN">Admin</option><option value="MANAGER">Manager</option><option value="VIEWER">Viewer</option></select> } @else { <span class="role-badge">{{ member.role | titlecase }}</span> }</td>
+                    <td class="date-cell">{{ formatDate(member.joinedAt) }}</td><td class="row-actions">@if (admin() && member.id !== session()?.user.id) { <button class="icon-button remove-button" (click)="removeMember(member)" [attr.aria-label]="'Remove ' + member.name">×</button> }</td></tr>
+                } @empty { <tr><td colspan="4"><div class="table-empty">No members yet. Invite your team to get started.</div></td></tr> }
+              </tbody></table></div>
+            </section>
+          }
+
+          @if (activeSection() === 'billing') {
+            <section class="page-heading"><div><span class="eyebrow">SUBSCRIPTION & PAYMENTS</span><h1>Billing</h1><p>Manage your plan and keep your workspace running.</p></div></section>
+            <section class="panel current-plan"><div class="plan-intro"><span class="current-plan-icon">◈</span><span><span class="eyebrow">CURRENT PLAN</span><h2>{{ subscription()?.plan | titlecase }}</h2><p>Your subscription is {{ subscription()?.status ?? 'inactive' }}.</p></span></div><div class="plan-value"><strong>{{ formatMoney((subscription()?.amountCents ?? 0) / 100) }}<small>/ month</small></strong>@if (subscription()?.currentPeriodEnd) { <span>Renews {{ formatDate(subscription()?.currentPeriodEnd!) }}</span> }</div><button class="button button-outline" (click)="openBillingPortal()">Manage subscription <span aria-hidden="true">↗</span></button></section>
+            <div class="section-title"><div><h2>Choose a plan</h2><p>All plans are securely managed through Stripe.</p></div></div>
+            <section class="plan-grid">
+              @for (plan of plans(); track plan.key) {
+                <article class="panel plan-card" [class.plan-featured]="plan.key === 'growth'"><span class="plan-label">{{ plan.name }}</span><h3>{{ plan.key === 'starter' ? 'The essentials.' : plan.key === 'growth' ? 'Room to grow.' : 'Built for scale.' }}</h3><p>Clear insights and tools for your next stage.</p><ul>@for (feature of plan.features; track feature) { <li><span>✓</span>{{ feature }}</li> }</ul><button class="button" [class.button-primary]="plan.key === 'growth'" [class.button-outline]="plan.key !== 'growth'" (click)="choosePlan(plan)" [disabled]="!plan.available || busy()">{{ plan.available ? 'Continue with ' + plan.name : 'Price not configured' }}</button></article>
+              }
+            </section>
+          }
+
+          @if (activeSection() === 'audit') {
+            <section class="page-heading"><div><span class="eyebrow">WORKSPACE ACTIVITY</span><h1>Audit log</h1><p>A record of important changes made in your workspace.</p></div><button class="button button-quiet" (click)="loadSection('audit')">↻ Refresh</button></section>
+            <section class="panel table-panel"><div class="panel-heading table-heading"><div><h2>Recent activity</h2><p>Admin and billing events, newest first</p></div><span class="count-pill">{{ auditLogs().length }} events</span></div><div class="table-scroll"><table><thead><tr><th>EVENT</th><th>ACTOR</th><th>DETAIL</th><th>DATE</th></tr></thead><tbody>
+              @for (log of auditLogs(); track log._id) { <tr><td><span class="event-dot"></span><strong>{{ log.action.replace('.', ' · ') }}</strong></td><td>{{ log.actorId?.name ?? 'System' }}</td><td class="detail-cell">{{ log.targetType }}{{ log.targetId ? ' · ' + log.targetId : '' }}</td><td class="date-cell">{{ formatDate(log.createdAt) }}</td></tr> }
+              @empty { <tr><td colspan="4"><div class="table-empty">No audit events have been recorded yet.</div></td></tr> }
+            </tbody></table></div></section>
+          }
+
+          @if (activeSection() === 'settings') {
+            <section class="page-heading"><div><span class="eyebrow">WORKSPACE PREFERENCES</span><h1>Settings</h1><p>Keep your workspace details up to date.</p></div></section>
+            <section class="panel settings-panel"><div class="panel-heading"><div><h2>General</h2><p>Update the details people see about this workspace.</p></div></div><form (ngSubmit)="saveOrganization()"><label for="setting-workspace-name">Workspace name</label><input id="setting-workspace-name" name="workspaceName" [(ngModel)]="organizationNameInput" required maxlength="120" [disabled]="!admin()" /><span class="field-hint">This name is visible to members of your workspace.</span><label>Workspace ID</label><code>{{ organization()?.slug }}</code><div class="settings-footer">@if (!admin()) { <span class="muted">Only an admin can change workspace details.</span> } @else { <button class="button button-primary" type="submit" [disabled]="busy()">Save changes</button> }</div></form></section>
+            <section class="panel account-panel"><div><h2>Your account</h2><p>{{ session()?.user.email }}</p></div><button class="button button-outline" (click)="signOut()">Sign out</button></section>
+          }
+          <footer class="page-footer"><span>© 2026 Northstar</span><span><a href="#privacy">Privacy</a><a href="#terms">Terms</a><span class="footer-version">Made for clear decisions</span></span></footer>
+        </main>
+      </section>
     </div>
-  </div>
+  }
 </main>
-
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * The content above * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * * -->
-<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-
-
-<router-outlet />

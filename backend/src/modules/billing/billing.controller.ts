@@ -5,61 +5,61 @@ import {
   Get,
   Headers,
   Post,
+  RawBodyRequest,
   Req,
+  UseGuards,
 } from '@nestjs/common';
-import Stripe from 'stripe';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? 'sk_test_123', {
-  apiVersion: '2025-03-31.basil',
-});
+import { Request } from 'express';
+import {
+  AccessTokenGuard,
+  AuthContext,
+  CurrentAuth,
+  Roles,
+  RolesGuard,
+} from '../auth/auth.context.js';
+import { CheckoutDto } from './billing.dto.js';
+import { BillingService } from './billing.service.js';
 
 @Controller('billing')
 export class BillingController {
-  @Post('checkout')
-  createCheckoutSession() {
-    return {
-      ok: true,
-      url: 'https://checkout.stripe.com/test_session_123',
-      customerPortalUrl: 'https://billing.stripe.com/p/login/test_portal_123',
-    };
+  constructor(private readonly billing: BillingService) {}
+
+  @Get('plans')
+  getPlans() {
+    return this.billing.getPlans();
   }
 
-  @Get('portal')
-  createPortalSession() {
-    return {
-      ok: true,
-      url: 'https://billing.stripe.com/p/login/test_portal_123',
-    };
+  @Get('subscription')
+  @UseGuards(AccessTokenGuard)
+  getSubscription(@CurrentAuth() auth: AuthContext) {
+    return this.billing.getSubscription(auth.organizationId);
+  }
+
+  @Post('checkout')
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @Roles('ADMIN')
+  createCheckoutSession(
+    @CurrentAuth() auth: AuthContext,
+    @Body() dto: CheckoutDto,
+  ) {
+    return this.billing.createCheckoutSession(auth.organizationId, dto.plan);
+  }
+
+  @Post('portal')
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @Roles('ADMIN')
+  createPortalSession(@CurrentAuth() auth: AuthContext) {
+    return this.billing.createPortalSession(auth.organizationId);
   }
 
   @Post('webhook')
-  handleWebhook(
-    @Req() req: any,
-    @Headers('stripe-signature') signature: string,
-    @Body() body: unknown,
+  async handleWebhook(
+    @Req() request: RawBodyRequest<Request>,
+    @Headers('stripe-signature') signature: string | undefined,
   ) {
-    if (!signature) {
-      throw new BadRequestException('Missing Stripe signature');
+    if (!signature || !request.rawBody) {
+      throw new BadRequestException('Missing Stripe signature or raw request body');
     }
-
-    const rawBody = Buffer.isBuffer(req.body)
-      ? req.body
-      : Buffer.from(JSON.stringify(body ?? {}));
-    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET ?? 'whsec_test';
-
-    try {
-      const event = stripe.webhooks.constructEvent(
-        rawBody,
-        signature,
-        endpointSecret,
-      );
-      return {
-        received: true,
-        eventType: event.type,
-        objectId: event.data.object.id,
-      };
-    } catch (error) {
-      throw new BadRequestException('Invalid Stripe signature');
-    }
+    return this.billing.handleWebhook(request.rawBody, signature);
   }
 }

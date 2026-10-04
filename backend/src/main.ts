@@ -1,21 +1,29 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { RequestMethod } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
-import * as express from 'express';
 import helmet from 'helmet';
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
 
-  app.use('/api/billing/webhook', express.raw({ type: 'application/json' }));
-  app.use(express.json({ limit: '1mb' }));
-  app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
   app.use(helmet());
-  app.enableCors({ origin: true, credentials: true });
-  app.setGlobalPrefix('api');
+  const origins = (process.env.CORS_ORIGINS ?? process.env.FRONTEND_URL ?? 'http://localhost:4200')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  app.enableCors({
+    origin: origins,
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Organization-Id'],
+  });
+  app.setGlobalPrefix('api', {
+    exclude: [{ path: 'billing/webhook', method: RequestMethod.POST }],
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

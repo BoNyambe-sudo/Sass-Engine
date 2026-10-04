@@ -1,17 +1,80 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { DatabaseService } from '../database/database.service.js';
+import { Membership, Subscription } from '../database/models.js';
 
 @Injectable()
 export class AnalyticsService {
-  getOverview() {
+  constructor(private readonly database: DatabaseService) {}
+
+  async getOverview(organizationId: string, from?: string, to?: string) {
+    const rangeStart = from ? new Date(from) : new Date(Date.now() - 30 * 86400_000);
+    const rangeEnd = to ? new Date(to) : new Date();
+    if (
+      Number.isNaN(rangeStart.getTime()) ||
+      Number.isNaN(rangeEnd.getTime()) ||
+      rangeStart >= rangeEnd ||
+      rangeEnd.getTime() - rangeStart.getTime() > 366 * 86400_000
+    ) {
+      throw new BadRequestException('Date range must be valid and no longer than 366 days');
+    }
+
+    const subscriptions = this.database.getModel<Subscription>('Subscription');
+    const members = this.database.getModel<Membership>('Membership');
+    const scope = { organizationId };
+    const [revenue, activeSubscriptions, totalSubscriptions, canceled, newUsers, series] =
+      await Promise.all([
+        subscriptions.aggregate([
+          { $match: { ...scope, status: { $in: ['active', 'trialing'] } } },
+          { $group: { _id: null, cents: { $sum: '$amountCents' } } },
+        ]),
+        subscriptions.countDocuments({
+          ...scope,
+          status: { $in: ['active', 'trialing'] },
+        }),
+        subscriptions.countDocuments(scope),
+        subscriptions.countDocuments({
+          ...scope,
+          canceledAt: { $gte: rangeStart, $lt: rangeEnd },
+        }),
+        members.countDocuments({
+          ...scope,
+          createdAt: { $gte: rangeStart, $lt: rangeEnd },
+        }),
+        members.aggregate([
+          {
+            $match: {
+              ...scope,
+              createdAt: { $gte: rangeStart, $lt: rangeEnd },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                $dateTrunc: {
+                  date: '$createdAt',
+                  unit: 'month',
+                  timezone: 'UTC',
+                },
+              },
+              count: { $sum: 1 },
+            },
+          },
+          { $sort: { _id: 1 } },
+        ]),
+      ]);
+    const churn = totalSubscriptions === 0 ? 0 : (canceled / totalSubscriptions) * 100;
+
     return {
-      mrr: 84250,
-      churn: 2.4,
-      activeSubscriptions: 184,
-      newUsers: 36,
-      conversionRate: 8.7,
+      range: { from: rangeStart.toISOString(), to: rangeEnd.toISOString() },
+      mrr: (revenue[0]?.cents ?? 0) / 100,
+      churn: Number(churn.toFixed(2)),
+      activeSubscriptions,
+      newUsers,
       series: {
-        mrr: [12000, 14600, 16800, 19900, 24400, 30200, 36525, 42000],
-        users: [18, 22, 30, 24, 36, 41, 34, 52],
+        newUsers: series.map((point) => ({
+          date: new Date(point._id).toISOString(),
+          value: point.count,
+        })),
       },
     };
   }
