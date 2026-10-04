@@ -13,6 +13,7 @@ import {
   StripeEvent,
   User,
 } from '../database/models.js';
+import { AuditService } from '../audit/audit.service.js';
 
 const planDetails = [
   { key: 'starter', name: 'Starter', features: ['Core analytics', 'Up to 5 seats'] },
@@ -24,7 +25,10 @@ const planDetails = [
 export class BillingService {
   private readonly logger = new Logger(BillingService.name);
 
-  constructor(private readonly database: DatabaseService) {}
+  constructor(
+    private readonly database: DatabaseService,
+    private readonly audit: AuditService,
+  ) {}
 
   getPlans() {
     return planDetails.map((plan) => ({
@@ -203,7 +207,7 @@ export class BillingService {
         const invoice = event.data.object as Stripe.Invoice;
         const customerId = this.idOf(invoice.customer);
         if (!customerId) throw new Error('Invoice event is missing the Stripe customer');
-        await this.database.getModel<Subscription>('Subscription').updateOne(
+        const updated = await this.database.getModel<Subscription>('Subscription').findOneAndUpdate(
           { stripeCustomerId: customerId, status: { $ne: 'canceled' } },
           {
             $set: {
@@ -211,7 +215,17 @@ export class BillingService {
               ...(event.type === 'invoice.paid' ? { canceledAt: null } : {}),
             },
           },
+          { new: true },
         );
+        if (updated) {
+          await this.audit.record({
+            organizationId: updated.organizationId.toString(),
+            actorId: null,
+            action: event.type === 'invoice.paid' ? 'billing.invoice_paid' : 'billing.payment_failed',
+            targetType: 'subscription',
+            targetId: updated.stripeSubscriptionId,
+          });
+        }
         break;
       }
       default:
@@ -252,7 +266,7 @@ export class BillingService {
     if (!organizationId && !(await this.database.getModel<Subscription>('Subscription').exists(filter))) {
       throw new Error('Subscription does not match a known organization');
     }
-    await this.database.getModel<Subscription>('Subscription').updateOne(
+    const updated = await this.database.getModel<Subscription>('Subscription').findOneAndUpdate(
       filter,
       {
         $set: {
@@ -269,13 +283,21 @@ export class BillingService {
         },
         ...(organizationId ? { $setOnInsert: { organizationId } } : {}),
       },
-      { upsert: Boolean(organizationId) },
+      { upsert: Boolean(organizationId), new: true },
     );
-    if (eventType === 'customer.subscription.deleted') {
-      await this.database.getModel<Subscription>('Subscription').updateOne(
-        { stripeSubscriptionId: subscription.id },
-        { $set: { status: 'canceled', canceledAt: canceledAt ?? new Date() } },
-      );
+    if (updated) {
+      await this.audit.record({
+        organizationId: updated.organizationId.toString(),
+        actorId: null,
+        action: 'billing.subscription_changed',
+        targetType: 'subscription',
+        targetId: subscription.id,
+        metadata: {
+          plan: updated.plan,
+          status: updated.status,
+          eventType,
+        },
+      });
     }
   }
 

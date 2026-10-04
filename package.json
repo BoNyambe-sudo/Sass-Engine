@@ -10,8 +10,8 @@
     "build": "pnpm --recursive --if-present build",
     "lint": "pnpm --recursive --if-present lint",
     "test": "pnpm --recursive --if-present test",
-    "format": "prettier --write \"**/*.{ts,html,scss,json,md,yml,yaml}\"",
-    "format:check": "prettier --check \"**/*.{ts,html,scss,json,md,yml,yaml}\""
+    "format": "prettier --write \"*.{json,md,yml,yaml}\" \"backend/src/**/*.ts\" \"backend/*.json\" \"frontend/src/**/*.{ts,html,scss}\" \"frontend/*.json\" \"frontend/proxy.conf.json\" \".github/workflows/*.yml\"",
+    "format:check": "prettier --check \"*.{json,md,yml,yaml}\" \"backend/src/**/*.ts\" \"backend/*.json\" \"frontend/src/**/*.{ts,html,scss}\" \"frontend/*.json\" \"frontend/proxy.conf.json\" \".github/workflows/*.yml\""
   },
   "devDependencies": {
     "prettier": "^3.6.2"

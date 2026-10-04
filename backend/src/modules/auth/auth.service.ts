@@ -199,9 +199,30 @@ export class AuthService {
 
   async logout(rawToken: string | undefined): Promise<void> {
     if (!rawToken) return;
-    await this.database
+    const session = await this.database
       .getModel<RefreshSession>('RefreshSession')
-      .updateOne({ tokenHash: tokenHash(rawToken), revokedAt: null }, { revokedAt: new Date() });
+      .findOneAndUpdate(
+        { tokenHash: tokenHash(rawToken), revokedAt: null },
+        { $set: { revokedAt: new Date() } },
+        { new: false },
+      );
+    if (!session) return;
+    const memberships = await this.database
+      .getModel<Membership>('Membership')
+      .find({ userId: session.userId })
+      .select('organizationId')
+      .lean();
+    await Promise.all(
+      memberships.map((membership) =>
+        this.audit.record({
+          organizationId: membership.organizationId.toString(),
+          actorId: session.userId.toString(),
+          action: 'auth.logout',
+          targetType: 'user',
+          targetId: session.userId.toString(),
+        }),
+      ),
+    );
   }
 
   async forgotPassword(email: string) {

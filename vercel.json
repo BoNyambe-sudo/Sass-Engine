@@ -5,7 +5,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://$BACKEND_HOST/api/:path*"
+      "destination": "https://saas-growth-engine-api.onrender.com/api/:path*"
     },
     {
       "source": "/:path*",

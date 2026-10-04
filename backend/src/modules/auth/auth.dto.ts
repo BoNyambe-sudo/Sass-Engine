@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   IsEmail,
   IsIn,
@@ -13,6 +14,7 @@ export class RegisterDto {
   email!: string;
 
   @IsNotEmpty()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
   @Length(1, 120)
   name!: string;
@@ -22,6 +24,7 @@ export class RegisterDto {
   password!: string;
 
   @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
   @Length(1, 120)
   organizationName?: string;
@@ -59,6 +62,7 @@ export class AcceptInvitationDto extends TokenDto {
   password!: string;
 
   @IsString()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @Length(1, 120)
   name!: string;
 }
@@ -78,6 +82,7 @@ export class ChangeRoleDto {
 
 export class UpdateOrganizationDto {
   @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
   @Length(1, 120)
   name?: string;

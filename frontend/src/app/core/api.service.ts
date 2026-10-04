@@ -1,8 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import {
-  HttpClient,
-  HttpHeaders,
-} from '@angular/common/http';
+import { HttpClient, HttpContext, HttpContextToken } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 const apiBase = '/api';
@@ -17,16 +14,18 @@ export interface SessionResponse {
   invitationToken?: string;
 }
 
+export const SKIP_AUTH_REFRESH = new HttpContextToken(() => false);
+
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   readonly session = signal<SessionResponse | null>(null);
+  private refreshPromise: Promise<SessionResponse> | null = null;
 
   constructor(private readonly http: HttpClient) {}
 
   async get<T>(path: string): Promise<T> {
     return firstValueFrom(
       this.http.get<T>(`${apiBase}/${path}`, {
-        headers: this.headers(),
         withCredentials: true,
       }),
     );
@@ -35,7 +34,6 @@ export class ApiService {
   async post<T>(path: string, body: unknown): Promise<T> {
     return firstValueFrom(
       this.http.post<T>(`${apiBase}/${path}`, body, {
-        headers: this.headers(),
         withCredentials: true,
       }),
     );
@@ -44,7 +42,6 @@ export class ApiService {
   async patch<T>(path: string, body: unknown): Promise<T> {
     return firstValueFrom(
       this.http.patch<T>(`${apiBase}/${path}`, body, {
-        headers: this.headers(),
         withCredentials: true,
       }),
     );
@@ -53,7 +50,6 @@ export class ApiService {
   async delete<T>(path: string): Promise<T> {
     return firstValueFrom(
       this.http.delete<T>(`${apiBase}/${path}`, {
-        headers: this.headers(),
         withCredentials: true,
       }),
     );
@@ -67,14 +63,30 @@ export class ApiService {
     this.session.set(null);
   }
 
-  private headers(): HttpHeaders {
-    const session = this.session();
-    let headers = new HttpHeaders();
-    if (session) {
-      headers = headers
-        .set('Authorization', `Bearer ${session.accessToken}`)
-        .set('X-Organization-Id', session.organizationId);
+  refreshSession(): Promise<SessionResponse> {
+    if (!this.refreshPromise) {
+      this.refreshPromise = firstValueFrom(
+        this.http.post<SessionResponse>(
+          `${apiBase}/auth/refresh`,
+          {},
+          {
+            withCredentials: true,
+            context: new HttpContext().set(SKIP_AUTH_REFRESH, true),
+          },
+        ),
+      )
+        .then((session) => {
+          this.setSession(session);
+          return session;
+        })
+        .catch((error: unknown) => {
+          this.clearSession();
+          throw error;
+        })
+        .finally(() => {
+          this.refreshPromise = null;
+        });
     }
-    return headers;
+    return this.refreshPromise;
   }
 }

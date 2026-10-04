@@ -117,8 +117,7 @@ export class App implements OnInit {
       return;
     }
     try {
-      const result = await this.api.post<SessionResponse>('auth/refresh', {});
-      this.api.setSession(result);
+      await this.api.refreshSession();
       await this.loadSection('overview');
     } catch {
       this.api.clearSession();

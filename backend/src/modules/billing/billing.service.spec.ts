@@ -1,18 +1,23 @@
 import { BadRequestException } from '@nestjs/common';
 import Stripe from 'stripe';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DatabaseService } from '../database/database.service.js';
+import { AuditService } from '../audit/audit.service.js';
 import { BillingService } from './billing.service.js';
 
 describe('BillingService webhooks', () => {
   beforeEach(() => {
-    process.env.STRIPE_SECRET_KEY = 'sk_test_unit_test_secret';
-    process.env.STRIPE_WEBHOOK_SECRET = 'whsec_unit_test_secret';
+    vi.stubEnv('STRIPE_SECRET_KEY', 'sk_test_unit_test_secret');
+    vi.stubEnv('STRIPE_WEBHOOK_SECRET', 'whsec_unit_test_secret');
   });
+  afterEach(() => vi.unstubAllEnvs());
 
   it('rejects invalid webhook signatures', async () => {
     const database = { getModel: vi.fn() } as unknown as DatabaseService;
-    const service = new BillingService(database);
+    const service = new BillingService(
+      database,
+      { record: vi.fn() } as unknown as AuditService,
+    );
 
     await expect(
       service.handleWebhook(Buffer.from('{}'), 'invalid-signature'),
@@ -43,7 +48,10 @@ describe('BillingService webhooks', () => {
     const database = {
       getModel: vi.fn(() => events),
     } as unknown as DatabaseService;
-    const service = new BillingService(database);
+    const service = new BillingService(
+      database,
+      { record: vi.fn() } as unknown as AuditService,
+    );
 
     await expect(service.handleWebhook(Buffer.from(payload), signature)).resolves.toEqual({
       received: true,

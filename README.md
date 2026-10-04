@@ -81,8 +81,9 @@ pnpm format:check
   check commands. Add the MongoDB URI, JWT secret, Stripe secrets/Price IDs,
   `FRONTEND_URL`, and `CORS_ORIGINS` to the Render service environment.
 - **Web / Vercel:** `vercel.json` builds the Angular browser bundle and routes
-  `/api/*` to the Render backend through the `BACKEND_HOST` environment
-  variable. Configure the matching public frontend URL on the API service.
+  `/api/*` to `https://saas-growth-engine-api.onrender.com`. If Render assigns a
+  different service hostname, update the rewrite destination. Configure the
+  matching public frontend URL on the API service.
 - Set `NODE_ENV=production`, use HTTPS, rotate all keys, restrict CORS to the
   deployed site, and verify Stripe webhook signatures before accepting live
   payments. The authenticated dashboard is private and should not be indexed.
