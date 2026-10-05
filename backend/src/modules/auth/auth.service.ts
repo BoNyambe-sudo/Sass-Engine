@@ -401,7 +401,7 @@ export class AuthService {
           expiresAt: { $gt: new Date() },
         },
         { $set: { acceptedAt: new Date() } },
-        { new: true },
+        { returnDocument: 'before' },
       );
     if (!accepted) {
       throw new UnauthorizedException(
@@ -459,7 +459,7 @@ export class AuthService {
           tokenHash: tokenHash(token),
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         },
-        { upsert: true, new: true, setDefaultsOnInsert: true },
+        { upsert: true, returnDocument: 'before', setDefaultsOnInsert: true },
       );
     try {
       await this.email.sendInvitation(email.trim().toLowerCase(), token);
@@ -499,7 +499,7 @@ export class AuthService {
           expiresAt: { $gt: new Date() },
         },
         { consumedAt: new Date() },
-        { new: true },
+        { returnDocument: 'before' },
       )
       .select('+tokenHash');
     if (!record) throw new UnauthorizedException('Token is invalid or expired');

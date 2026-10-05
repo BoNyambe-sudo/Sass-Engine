@@ -69,7 +69,7 @@ export class OrganizationsController {
       .findOneAndUpdate(
         { _id: auth.organizationId },
         { $set: { name: dto.name } },
-        { new: true, runValidators: true },
+        { returnDocument: 'before', runValidators: true },
       )
       .select('name slug');
     if (!organization) throw new NotFoundException('Organization not found');

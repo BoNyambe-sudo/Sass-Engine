@@ -251,7 +251,7 @@ export class BillingService {
                 ...(event.type === 'invoice.paid' ? { canceledAt: null } : {}),
               },
             },
-            { new: true },
+            { returnDocument: 'before' },
           );
         if (updated) {
           await this.audit.record({
@@ -336,7 +336,7 @@ export class BillingService {
           },
           ...(organizationId ? { $setOnInsert: { organizationId } } : {}),
         },
-        { upsert: Boolean(organizationId), new: true },
+        { upsert: Boolean(organizationId), returnDocument: 'before' },
       );
     if (updated) {
       await this.audit.record({
