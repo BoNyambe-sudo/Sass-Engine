@@ -7,6 +7,9 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module.js';
 
+import * as dns from 'node:dns';
+dns.setServers(['8.8.8.8', '1.1.1.1']);
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true,

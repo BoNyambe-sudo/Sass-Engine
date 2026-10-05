@@ -16,6 +16,11 @@ client is an Angular 22 standalone application.
 1. Copy `.env.example` to `.env`, set `MONGODB_URI`, and create a random
    `JWT_SECRET` of at least 32 characters. Configure Stripe test keys and Price
    IDs when testing billing.
+
+   The backend loads `.env` from its current directory first, then from the
+   repository root. This supports running it from either the workspace root or
+   the `backend` package directory; deployment environments can provide the
+   same values as process environment variables.
 2. Install the pinned workspace dependencies:
 
    ```sh
