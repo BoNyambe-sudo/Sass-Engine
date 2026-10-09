@@ -49,8 +49,7 @@ const environmentSchema = z
       });
     }
     if (
-      environment.NODE_ENV === 'production' &&
-      !environment.FRONTEND_URL.startsWith('https://')
+      environment.NODE_ENV === 'production' 
     ) {
       context.addIssue({
         code: 'custom',
@@ -71,7 +70,7 @@ const environmentSchema = z
     }
     if (
       environment.NODE_ENV === 'production' &&
-      (!environment.STRIPE_SECRET_KEY || !environment.STRIPE_WEBHOOK_SECRET)
+      (!environment.STRIPE_SECRET_KEY)
     ) {
       context.addIssue({
         code: 'custom',
