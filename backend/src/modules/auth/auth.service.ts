@@ -214,7 +214,7 @@ export class AuthService {
           expiresAt: { $gt: new Date() },
         },
         { $set: { revokedAt: new Date() } },
-        { returnDocument: 'before' },
+        { returnDocument: 'after' },
       )
       .select('+tokenHash');
     if (!session) throw new UnauthorizedException('Refresh session expired');
@@ -254,7 +254,7 @@ export class AuthService {
       .findOneAndUpdate(
         { tokenHash: tokenHash(rawToken), revokedAt: null },
         { $set: { revokedAt: new Date() } },
-        { returnDocument: 'before' },
+        { returnDocument: 'after' },
       );
     if (!session) return;
     const memberships = await this.database
