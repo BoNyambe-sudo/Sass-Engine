@@ -2,10 +2,7 @@
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm --filter @saas-growth-engine/frontend build",
   "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://saas-growth-engine-api.onrender.com/api/:path*"
-    },
+    
     {
       "source": "/:path*",
       "destination": "/index.html"
