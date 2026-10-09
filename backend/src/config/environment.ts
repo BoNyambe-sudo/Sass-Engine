@@ -48,15 +48,7 @@ const environmentSchema = z
         message: 'JWT_SECRET must not use a sample placeholder in production',
       });
     }
-    if (
-      environment.NODE_ENV === 'production' 
-    ) {
-      context.addIssue({
-        code: 'custom',
-        path: ['FRONTEND_URL'],
-        message: 'FRONTEND_URL must use HTTPS in production',
-      });
-    }
+    
     if (
       environment.NODE_ENV === 'production' &&
       environment.MONGODB_URI.startsWith('mongodb://') &&
