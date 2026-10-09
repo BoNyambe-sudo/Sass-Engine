@@ -1,5 +1,4 @@
 {
-  "buildCommand": "cd frontend && pnpm install --frozen-lockfile && pnpm build",
   "rewrites": [
     {
       "source": "/(.*)",
