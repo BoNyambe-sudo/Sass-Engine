@@ -10,6 +10,9 @@ import { modelSchemas } from './models.js';
 
 type ModelName = keyof typeof modelSchemas;
 
+const MAX_RETRIES = 5;
+const BASE_DELAY_MS = 1000;
+
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DatabaseService.name);
@@ -26,28 +29,45 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       throw new Error('MONGODB_URI is required');
     }
 
-    this.connection = mongoose.createConnection(uri, {
+    const options = {
       autoIndex: process.env.NODE_ENV !== 'production',
       maxPoolSize: Number(process.env.MONGODB_MAX_POOL_SIZE ?? 20),
       serverSelectionTimeoutMS: 10_000,
       bufferCommands: false,
-    });
-    this.connection.on('error', (error) =>
-      this.logger.error('MongoDB connection error', error.stack),
-    );
+      retryWrites: true,
+      retryReads: true,
+      maxIdleTimeMS: 60_000,
+    };
 
-    try {
-      await this.connection.asPromise();
-      for (const [name, schema] of Object.entries(modelSchemas) as [
-        ModelName,
-        (typeof modelSchemas)[ModelName],
-      ][]) {
-        this.models.set(name, this.connection.model(name, schema));
-      }
-      this.logger.log('Connected to MongoDB');
-    } catch (error) {
-      await this.connection.close();
-      throw error;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      this.connection = mongoose.createConnection(uri, options);
+      this.connection.on('error', (error) =>
+        this.logger.error(`MongoDB connection error (attempt ${attempt})`, error.stack),
+      );
+
+      try {
+        await this.connection.asPromise();
+        for (const [name, schema] of Object.entries(modelSchemas) as [
+          ModelName,
+          (typeof modelSchemas)[ModelName],
+        ][]) {
+          this.models.set(name, this.connection.model(name, schema));
+        }
+        this.logger.log('Connected to MongoDB');
+        return;
+} catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          this.logger.warn(`MongoDB connection attempt ${attempt} failed: ${message}`);
+          await this.connection.close();
+          if (attempt === MAX_RETRIES) {
+            throw new ServiceUnavailableException(
+              `Failed to connect to MongoDB after ${MAX_RETRIES} attempts`,
+            );
+          }
+          const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
+          this.logger.log(`Retrying in ${delay}ms...`);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
     }
   }
 

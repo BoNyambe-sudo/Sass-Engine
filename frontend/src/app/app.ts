@@ -42,6 +42,11 @@ interface Plan {
   name: string;
   available: boolean;
   features: string[];
+  tagline?: string;
+  priceId?: string;
+  amountCents?: number;
+  currency?: string;
+  interval?: string;
 }
 
 interface AuditRecord {

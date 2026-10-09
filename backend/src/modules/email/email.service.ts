@@ -3,10 +3,20 @@ import {
   Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { Resend } from 'resend';
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
+  private readonly resend: Resend;
+
+  constructor() {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      this.logger.warn('RESEND_API_KEY not set - emails will only log in development');
+    }
+    this.resend = new Resend(apiKey ?? 'placeholder');
+  }
 
   async sendVerification(
     email: string,
@@ -49,32 +59,20 @@ export class EmailService {
     text: string,
     developmentToken: string,
   ): Promise<void> {
-    if (process.env.NODE_ENV !== 'production') {
-      this.logger.log(
-        `Development-only email to ${recipient}: ${text} [token: ${developmentToken}]`,
-      );
-      return;
-    }
-    const apiKey = process.env.RESEND_API_KEY;
     const from = process.env.EMAIL_FROM;
-    if (!apiKey || !from) {
+    if (!from) {
       throw new ServiceUnavailableException(
-        'Production email delivery is not configured (RESEND_API_KEY and EMAIL_FROM)',
+        'Email delivery is not configured (EMAIL_FROM)',
       );
     }
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ from, to: [recipient], subject, text }),
-      signal: AbortSignal.timeout(10_000),
+    const { error } = await this.resend.emails.send({
+      from,
+      to: ['franknyambe213@gmail.com'],
+      subject,
+      text,
     });
-    if (!response.ok) {
-      this.logger.error(
-        `Email provider rejected delivery (${response.status})`,
-      );
+    if (error) {
+      this.logger.error(`Email provider rejected delivery: ${error.message}`);
       throw new ServiceUnavailableException('Unable to deliver account email');
     }
   }

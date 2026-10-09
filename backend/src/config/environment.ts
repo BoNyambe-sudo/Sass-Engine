@@ -28,6 +28,14 @@ const environmentSchema = z
       .default('http://localhost:4200'),
     RESEND_API_KEY: z.string().optional(),
     EMAIL_FROM: z.string().optional(),
+    STRIPE_SECRET_KEY: z.string().optional(),
+    STRIPE_WEBHOOK_SECRET: z.string().optional(),
+    STRIPE_PRICE_STARTER: z.string().optional(),
+    STRIPE_PRICE_GROWTH: z.string().optional(),
+    STRIPE_PRICE_SCALE: z.string().optional(),
+    STRIPE_CHECKOUT_SUCCESS_URL: z.string().url().optional(),
+    STRIPE_CHECKOUT_CANCEL_URL: z.string().url().optional(),
+    STRIPE_PORTAL_RETURN_URL: z.string().url().optional(),
   })
   .superRefine((environment, context) => {
     if (
@@ -59,6 +67,27 @@ const environmentSchema = z
         code: 'custom',
         path: ['MONGODB_URI'],
         message: 'Production MongoDB connections must use TLS',
+      });
+    }
+    if (
+      environment.NODE_ENV === 'production' &&
+      (!environment.STRIPE_SECRET_KEY ||
+        !environment.STRIPE_WEBHOOK_SECRET)
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['STRIPE_SECRET_KEY'],
+        message: 'Stripe credentials are required in production',
+      });
+    }
+    if (
+      environment.NODE_ENV === 'production' &&
+      (!environment.RESEND_API_KEY || !environment.EMAIL_FROM)
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['RESEND_API_KEY'],
+        message: 'Resend email credentials are required in production',
       });
     }
   });

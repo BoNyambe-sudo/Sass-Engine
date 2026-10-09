@@ -15,38 +15,93 @@ import {
 } from '../database/models.js';
 import { AuditService } from '../audit/audit.service.js';
 
-const planDetails = [
-  {
-    key: 'starter',
-    name: 'Starter',
-    features: ['Core analytics', 'Up to 5 seats'],
-  },
-  {
-    key: 'growth',
-    name: 'Growth',
-    features: ['Advanced analytics', 'Up to 25 seats'],
-  },
-  {
-    key: 'scale',
-    name: 'Scale',
-    features: ['Custom reporting', 'Unlimited seats'],
-  },
-] as const;
+const PLAN_KEYS = ['starter', 'growth', 'scale'] as const;
+const PLAN_FEATURES: Record<(typeof PLAN_KEYS)[number], string[]> = {
+  starter: ['Core analytics', 'Up to 5 seats'],
+  growth: ['Advanced analytics', 'Up to 25 seats'],
+  scale: ['Custom reporting', 'Unlimited seats'],
+};
+const PLAN_NAMES: Record<(typeof PLAN_KEYS)[number], string> = {
+  starter: 'Starter',
+  growth: 'Growth',
+  scale: 'Scale',
+};
+const PLAN_TAGLINES: Record<(typeof PLAN_KEYS)[number], string> = {
+  starter: 'The essentials.',
+  growth: 'Room to grow.',
+  scale: 'Built for scale.',
+};
 
 @Injectable()
 export class BillingService {
   private readonly logger = new Logger(BillingService.name);
+  private stripe?: Stripe;
+  private plansCache: Array<{
+    key: (typeof PLAN_KEYS)[number];
+    name: string;
+    features: string[];
+    tagline: string;
+    available: boolean;
+    priceId?: string;
+    amountCents?: number;
+    currency?: string;
+    interval?: string;
+  }> | null = null;
 
   constructor(
     private readonly database: DatabaseService,
     private readonly audit: AuditService,
   ) {}
 
-  getPlans() {
-    return planDetails.map((plan) => ({
-      ...plan,
-      available: Boolean(process.env[`STRIPE_PRICE_${plan.key.toUpperCase()}`]),
-    }));
+  private getStripe(): Stripe {
+    if (!this.stripe) {
+      const key = process.env.STRIPE_SECRET_KEY;
+      if (!key) throw new ServiceUnavailableException('Stripe is not configured');
+      this.stripe = new Stripe(key);
+    }
+    return this.stripe;
+  }
+
+  async getPlans() {
+    if (this.plansCache) return this.plansCache;
+
+    const stripe = this.getStripe();
+    const priceIds = PLAN_KEYS.map((key) => process.env[`STRIPE_PRICE_${key.toUpperCase()}`]).filter(Boolean) as string[];
+
+    const plans = await Promise.all(
+      PLAN_KEYS.map(async (key) => {
+        const priceId = process.env[`STRIPE_PRICE_${key.toUpperCase()}`];
+        const basePlan = {
+          key,
+          name: PLAN_NAMES[key],
+          features: PLAN_FEATURES[key],
+          tagline: PLAN_TAGLINES[key],
+          available: Boolean(priceId),
+        };
+
+        if (!priceId) {
+          return basePlan;
+        }
+
+        try {
+          const price = await stripe.prices.retrieve(priceId);
+          return {
+            ...basePlan,
+            priceId,
+            amountCents: price.unit_amount ?? undefined,
+            currency: price.currency?.toUpperCase(),
+            interval: price.recurring?.interval,
+          };
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          this.logger.warn(`Failed to retrieve Stripe price for ${key}: ${message}`);
+          return basePlan;
+        }
+      }),
+    );
+
+    this.plansCache = plans;
+    return plans;
   }
 
   async getSubscription(organizationId: string) {
@@ -67,7 +122,7 @@ export class BillingService {
 
   async createCheckoutSession(
     organizationId: string,
-    plan: (typeof planDetails)[number]['key'],
+    plan: (typeof PLAN_KEYS)[number],
   ) {
     const stripe = this.getStripe();
     const price = process.env[`STRIPE_PRICE_${plan.toUpperCase()}`];
@@ -352,12 +407,6 @@ export class BillingService {
         },
       });
     }
-  }
-
-  private getStripe(): Stripe {
-    const key = process.env.STRIPE_SECRET_KEY;
-    if (!key) throw new ServiceUnavailableException('Stripe is not configured');
-    return new Stripe(key);
   }
 
   private requiredUrl(name: string): string {
