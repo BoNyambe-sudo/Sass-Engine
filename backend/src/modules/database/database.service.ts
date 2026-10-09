@@ -42,7 +42,10 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       this.connection = mongoose.createConnection(uri, options);
       this.connection.on('error', (error) =>
-        this.logger.error(`MongoDB connection error (attempt ${attempt})`, error.stack),
+        this.logger.error(
+          `MongoDB connection error (attempt ${attempt})`,
+          error.stack,
+        ),
       );
 
       try {
@@ -55,19 +58,21 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         }
         this.logger.log('Connected to MongoDB');
         return;
-} catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          this.logger.warn(`MongoDB connection attempt ${attempt} failed: ${message}`);
-          await this.connection.close();
-          if (attempt === MAX_RETRIES) {
-            throw new ServiceUnavailableException(
-              `Failed to connect to MongoDB after ${MAX_RETRIES} attempts`,
-            );
-          }
-          const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
-          this.logger.log(`Retrying in ${delay}ms...`);
-          await new Promise((resolve) => setTimeout(resolve, delay));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.warn(
+          `MongoDB connection attempt ${attempt} failed: ${message}`,
+        );
+        await this.connection.close();
+        if (attempt === MAX_RETRIES) {
+          throw new ServiceUnavailableException(
+            `Failed to connect to MongoDB after ${MAX_RETRIES} attempts`,
+          );
         }
+        const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
+        this.logger.log(`Retrying in ${delay}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
     }
   }
 

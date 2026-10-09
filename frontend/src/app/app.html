@@ -20,34 +20,118 @@
       <div class="auth-panel">
         <div class="auth-box">
           <div class="mobile-mark"><span class="brand-mark">S</span><span>Northstar</span></div>
-          <span class="eyebrow">{{ authMode() === 'login' ? 'WELCOME BACK' : authMode() === 'signup' ? 'GET STARTED' : authMode() === 'reset' ? 'ACCOUNT SECURITY' : 'WORKSPACE INVITATION' }}</span>
-          <h1>{{ authMode() === 'login' ? 'Sign in to your account' : authMode() === 'signup' ? 'Create your workspace' : authMode() === 'reset' ? 'Choose a new password' : 'Join your team' }}</h1>
-          <p class="muted">{{ authMode() === 'login' ? 'Pick up right where your team left off.' : authMode() === 'signup' ? 'A clear view of growth starts here.' : authMode() === 'reset' ? 'Your new password must be at least 12 characters.' : 'Set up your account to accept this invitation.' }}</p>
-          @if (error()) { <div class="alert alert-error" role="alert">{{ error() }}</div> }
-          @if (notice()) { <div class="alert alert-success" role="status">{{ notice() }}</div> }
+          <span class="eyebrow">{{
+            authMode() === 'login'
+              ? 'WELCOME BACK'
+              : authMode() === 'signup'
+                ? 'GET STARTED'
+                : authMode() === 'reset'
+                  ? 'ACCOUNT SECURITY'
+                  : 'WORKSPACE INVITATION'
+          }}</span>
+          <h1>
+            {{
+              authMode() === 'login'
+                ? 'Sign in to your account'
+                : authMode() === 'signup'
+                  ? 'Create your workspace'
+                  : authMode() === 'reset'
+                    ? 'Choose a new password'
+                    : 'Join your team'
+            }}
+          </h1>
+          <p class="muted">
+            {{
+              authMode() === 'login'
+                ? 'Pick up right where your team left off.'
+                : authMode() === 'signup'
+                  ? 'A clear view of growth starts here.'
+                  : authMode() === 'reset'
+                    ? 'Your new password must be at least 12 characters.'
+                    : 'Set up your account to accept this invitation.'
+            }}
+          </p>
+          @if (error()) {
+            <div class="alert alert-error" role="alert">{{ error() }}</div>
+          }
+          @if (notice()) {
+            <div class="alert alert-success" role="status">{{ notice() }}</div>
+          }
           <form (ngSubmit)="submitAuth()" #authForm="ngForm">
             @if (authMode() === 'signup' || authMode() === 'invite') {
               <label for="full-name">Your name</label>
-              <input id="full-name" name="fullName" [(ngModel)]="fullName" autocomplete="name" required maxlength="120" />
+              <input
+                id="full-name"
+                name="fullName"
+                [(ngModel)]="fullName"
+                autocomplete="name"
+                required
+                maxlength="120"
+              />
             }
             @if (authMode() === 'signup') {
               <label for="workspace-name">Workspace name</label>
-              <input id="workspace-name" name="organizationName" [(ngModel)]="organizationName" autocomplete="organization" required maxlength="120" />
+              <input
+                id="workspace-name"
+                name="organizationName"
+                [(ngModel)]="organizationName"
+                autocomplete="organization"
+                required
+                maxlength="120"
+              />
             }
             @if (authMode() === 'login' || authMode() === 'signup') {
               <label for="email">Work email</label>
-              <input id="email" name="email" type="email" [(ngModel)]="email" autocomplete="email" required />
+              <input
+                id="email"
+                name="email"
+                type="email"
+                [(ngModel)]="email"
+                autocomplete="email"
+                required
+              />
             }
-            <div class="label-row"><label for="password">{{ authMode() === 'login' ? 'Password' : 'New password' }}</label>
+            <div class="label-row">
+              <label for="password">{{
+                authMode() === 'login' ? 'Password' : 'New password'
+              }}</label>
               @if (authMode() === 'login') {
-                <button type="button" class="text-button" (click)="forgotPassword()">Forgot password?</button>
+                <button type="button" class="text-button" (click)="forgotPassword()">
+                  Forgot password?
+                </button>
               }
             </div>
-            <input id="password" name="password" type="password" [(ngModel)]="password" [attr.autocomplete]="authMode() === 'login' ? 'current-password' : 'new-password'" [minlength]="authMode() === 'login' ? 1 : 12" required />
-            @if (authMode() !== 'login') { <span class="field-hint">Use at least 12 characters.</span> }
-            <button class="button button-primary auth-submit" type="submit" [disabled]="busy() || authForm.invalid">
-              {{ busy() ? 'Please wait…' : authMode() === 'login' ? 'Sign in' : authMode() === 'signup' ? 'Create workspace' : authMode() === 'reset' ? 'Update password' : 'Accept invitation' }}
-              @if (!busy()) { <span aria-hidden="true">→</span> }
+            <input
+              id="password"
+              name="password"
+              type="password"
+              [(ngModel)]="password"
+              [attr.autocomplete]="authMode() === 'login' ? 'current-password' : 'new-password'"
+              [minlength]="authMode() === 'login' ? 1 : 12"
+              required
+            />
+            @if (authMode() !== 'login') {
+              <span class="field-hint">Use at least 12 characters.</span>
+            }
+            <button
+              class="button button-primary auth-submit"
+              type="submit"
+              [disabled]="busy() || authForm.invalid"
+            >
+              {{
+                busy()
+                  ? 'Please wait…'
+                  : authMode() === 'login'
+                    ? 'Sign in'
+                    : authMode() === 'signup'
+                      ? 'Create workspace'
+                      : authMode() === 'reset'
+                        ? 'Update password'
+                        : 'Accept invitation'
+              }}
+              @if (!busy()) {
+                <span aria-hidden="true">→</span>
+              }
             </button>
           </form>
           @if (authMode() === 'login' || authMode() === 'signup') {
@@ -58,7 +142,10 @@
               </button>
             </p>
           }
-          <p class="auth-legal">By continuing, you agree to our <a href="#terms">Terms</a> and <a href="#privacy">Privacy Policy</a>.</p>
+          <p class="auth-legal">
+            By continuing, you agree to our <a href="#terms">Terms</a> and
+            <a href="#privacy">Privacy Policy</a>.
+          </p>
         </div>
       </div>
     </section>
@@ -68,18 +155,49 @@
         <a class="wordmark sidebar-brand" href="/" aria-label="Northstar dashboard">
           <span class="brand-mark">S</span><span>Northstar</span>
         </a>
-        <button class="workspace-switcher" (click)="selectSection('settings')" aria-label="Open workspace settings">
+        <button
+          class="workspace-switcher"
+          (click)="selectSection('settings')"
+          aria-label="Open workspace settings"
+        >
           <span class="workspace-avatar">{{ organization()?.name?.slice(0, 1) ?? 'W' }}</span>
-          <span class="workspace-name"><strong>{{ organization()?.name ?? session()?.organization.name }}</strong><small>Growth workspace</small></span>
+          <span class="workspace-name"
+            ><strong>{{ organization()?.name ?? session()?.organization.name }}</strong
+            ><small>Growth workspace</small></span
+          >
           <span class="switch-caret" aria-hidden="true">⌄</span>
         </button>
         <span class="nav-caption">WORKSPACE</span>
         <nav aria-label="Main navigation">
-          <button class="nav-item" [class.active]="activeSection() === 'overview'" (click)="selectSection('overview')"><span class="nav-icon">◫</span> Overview</button>
-          <button class="nav-item" [class.active]="activeSection() === 'members'" (click)="selectSection('members')"><span class="nav-icon">♧</span> Members</button>
-          <button class="nav-item" [class.active]="activeSection() === 'billing'" (click)="selectSection('billing')"><span class="nav-icon">◈</span> Billing</button>
+          <button
+            class="nav-item"
+            [class.active]="activeSection() === 'overview'"
+            (click)="selectSection('overview')"
+          >
+            <span class="nav-icon">◫</span> Overview
+          </button>
+          <button
+            class="nav-item"
+            [class.active]="activeSection() === 'members'"
+            (click)="selectSection('members')"
+          >
+            <span class="nav-icon">♧</span> Members
+          </button>
+          <button
+            class="nav-item"
+            [class.active]="activeSection() === 'billing'"
+            (click)="selectSection('billing')"
+          >
+            <span class="nav-icon">◈</span> Billing
+          </button>
           @if (admin()) {
-            <button class="nav-item" [class.active]="activeSection() === 'audit'" (click)="selectSection('audit')"><span class="nav-icon">≋</span> Audit log</button>
+            <button
+              class="nav-item"
+              [class.active]="activeSection() === 'audit'"
+              (click)="selectSection('audit')"
+            >
+              <span class="nav-icon">≋</span> Audit log
+            </button>
           }
         </nav>
         <div class="sidebar-spacer"></div>
@@ -90,118 +208,547 @@
         </div>
         <button class="profile-button" (click)="selectSection('settings')">
           <span class="avatar">{{ initials() }}</span>
-          <span class="profile-copy"><strong>{{ session()?.user.name }}</strong><small>{{ session()?.role | titlecase }}</small></span>
+          <span class="profile-copy"
+            ><strong>{{ session()?.user.name }}</strong
+            ><small>{{ session()?.role | titlecase }}</small></span
+          >
           <span class="profile-menu" aria-hidden="true">···</span>
         </button>
       </aside>
 
       <section class="main-column">
         <header class="topbar">
-          <div class="breadcrumbs"><span>Workspace</span><span class="crumb-separator">/</span><strong>{{ activeSection() === 'overview' ? 'Overview' : activeSection() | titlecase }}</strong></div>
+          <div class="breadcrumbs">
+            <span>Workspace</span><span class="crumb-separator">/</span
+            ><strong>{{
+              activeSection() === 'overview' ? 'Overview' : (activeSection() | titlecase)
+            }}</strong>
+          </div>
           <div class="top-actions">
-            <span class="live-status"><span class="status-dot"></span> All systems operational</span>
-            <button class="icon-button theme-button" (click)="toggleTheme()" [attr.aria-label]="theme() === 'light' ? 'Switch to dark theme' : 'Switch to light theme'">{{ theme() === 'light' ? '◐' : '☼' }}</button>
-            <button class="top-avatar" (click)="selectSection('settings')" [attr.aria-label]="'Account settings for ' + session()?.user.name">{{ initials() }}</button>
+            <span class="live-status"
+              ><span class="status-dot"></span> All systems operational</span
+            >
+            <button
+              class="icon-button theme-button"
+              (click)="toggleTheme()"
+              [attr.aria-label]="
+                theme() === 'light' ? 'Switch to dark theme' : 'Switch to light theme'
+              "
+            >
+              {{ theme() === 'light' ? '◐' : '☼' }}
+            </button>
+            <button
+              class="top-avatar"
+              (click)="selectSection('settings')"
+              [attr.aria-label]="'Account settings for ' + session()?.user.name"
+            >
+              {{ initials() }}
+            </button>
           </div>
         </header>
 
         <main class="content">
-          @if (error()) { <div class="alert alert-error page-alert" role="alert">{{ error() }}</div> }
-          @if (notice()) { <div class="alert alert-success page-alert" role="status">{{ notice() }}</div> }
-          @if (busy()) { <div class="busy-indicator" role="status">Updating workspace…</div> }
+          @if (error()) {
+            <div class="alert alert-error page-alert" role="alert">{{ error() }}</div>
+          }
+          @if (notice()) {
+            <div class="alert alert-success page-alert" role="status">{{ notice() }}</div>
+          }
+          @if (busy()) {
+            <div class="busy-indicator" role="status">Updating workspace…</div>
+          }
 
           @if (activeSection() === 'overview') {
             <section class="page-heading">
-              <div><span class="eyebrow">{{ today | date:'EEEE, MMMM d, y' | uppercase }}</span><h1>Good morning, {{ firstName() }} <span class="wave">✳</span></h1><p>Here's what's happening with your business today.</p></div>
-              <button class="button button-outline" (click)="selectSection('members')"><span aria-hidden="true">＋</span> Invite a teammate</button>
+              <div>
+                <span class="eyebrow">{{ today | date: 'EEEE, MMMM d, y' | uppercase }}</span>
+                <h1>Good morning, {{ firstName() }} <span class="wave">✳</span></h1>
+                <p>Here's what's happening with your business today.</p>
+              </div>
+              <button class="button button-outline" (click)="selectSection('members')">
+                <span aria-hidden="true">＋</span> Invite a teammate
+              </button>
             </section>
             @if (overview(); as data) {
               <section class="metric-grid" aria-label="Growth metrics">
-                <article class="metric-card"><div class="metric-top"><span>Monthly recurring revenue</span><span class="metric-icon violet">$</span></div><strong class="metric-value" [class.multi-currency]="data.mrr === null">{{ data.mrr === null ? 'Mixed currencies' : formatMoney(data.mrr, data.mrrCurrency) }}</strong><span class="metric-foot">Current active subscriptions</span></article>
-                <article class="metric-card"><div class="metric-top"><span>Active subscriptions</span><span class="metric-icon blue">↗</span></div><strong class="metric-value">{{ data.activeSubscriptions | number }}</strong><span class="metric-foot">Across your workspace</span></article>
-                <article class="metric-card"><div class="metric-top"><span>Churn rate</span><span class="metric-icon amber">↘</span></div><strong class="metric-value">{{ data.churn }}<small>%</small></strong><span class="metric-foot">In the last 30 days</span></article>
-                <article class="metric-card"><div class="metric-top"><span>New members</span><span class="metric-icon green">＋</span></div><strong class="metric-value">{{ data.newUsers | number }}</strong><span class="metric-foot">Joined in the last 30 days</span></article>
+                <article class="metric-card">
+                  <div class="metric-top">
+                    <span>Monthly recurring revenue</span><span class="metric-icon violet">$</span>
+                  </div>
+                  <strong class="metric-value" [class.multi-currency]="data.mrr === null">{{
+                    data.mrr === null ? 'Mixed currencies' : formatMoney(data.mrr, data.mrrCurrency)
+                  }}</strong
+                  ><span class="metric-foot">Current active subscriptions</span>
+                </article>
+                <article class="metric-card">
+                  <div class="metric-top">
+                    <span>Active subscriptions</span><span class="metric-icon blue">↗</span>
+                  </div>
+                  <strong class="metric-value">{{ data.activeSubscriptions | number }}</strong
+                  ><span class="metric-foot">Across your workspace</span>
+                </article>
+                <article class="metric-card">
+                  <div class="metric-top">
+                    <span>Churn rate</span><span class="metric-icon amber">↘</span>
+                  </div>
+                  <strong class="metric-value">{{ data.churn }}<small>%</small></strong
+                  ><span class="metric-foot">In the last 30 days</span>
+                </article>
+                <article class="metric-card">
+                  <div class="metric-top">
+                    <span>New members</span><span class="metric-icon green">＋</span>
+                  </div>
+                  <strong class="metric-value">{{ data.newUsers | number }}</strong
+                  ><span class="metric-foot">Joined in the last 30 days</span>
+                </article>
               </section>
               <section class="overview-grid">
                 <article class="panel chart-panel">
-                  <div class="panel-heading"><div><h2>Workspace growth</h2><p>New members joined over the selected period</p></div><span class="period-pill">Last 30 days</span></div>
+                  <div class="panel-heading">
+                    <div>
+                      <h2>Workspace growth</h2>
+                      <p>New members joined over the selected period</p>
+                    </div>
+                    <span class="period-pill">Last 30 days</span>
+                  </div>
                   @if (data.series.newUsers.length) {
                     <div class="chart" role="img" aria-label="Monthly new member bar chart">
                       @for (point of data.series.newUsers; track point.date) {
-                        <div class="chart-column"><span class="chart-number">{{ point.value }}</span><div class="chart-track"><span class="chart-bar" [style.height.%]="chartHeight(data, point.value)"></span></div><span class="chart-label">{{ point.date | date:'MMM' }}</span></div>
+                        <div class="chart-column">
+                          <span class="chart-number">{{ point.value }}</span>
+                          <div class="chart-track">
+                            <span
+                              class="chart-bar"
+                              [style.height.%]="chartHeight(data, point.value)"
+                            ></span>
+                          </div>
+                          <span class="chart-label">{{ point.date | date: 'MMM' }}</span>
+                        </div>
                       }
                     </div>
                   } @else {
-                    <div class="empty-chart"><span class="empty-graphic">↗</span><strong>Your growth story starts here</strong><span>New member activity will appear as your team grows.</span></div>
+                    <div class="empty-chart">
+                      <span class="empty-graphic">↗</span
+                      ><strong>Your growth story starts here</strong
+                      ><span>New member activity will appear as your team grows.</span>
+                    </div>
                   }
                 </article>
                 <article class="panel health-panel">
-                  <div class="panel-heading"><div><h2>Workspace health</h2><p>Everything in one place</p></div><span class="health-indicator">LIVE</span></div>
-                  <div class="health-row"><span class="health-symbol">◈</span><span><strong>{{ subscription()?.plan | titlecase }}</strong><small>Current plan</small></span><button class="subtle-link" (click)="selectSection('billing')">Manage <span>→</span></button></div>
-                  <div class="health-row"><span class="health-symbol green-symbol">♧</span><span><strong>{{ organization()?.memberCount ?? 0 }} members</strong><small>Active in this workspace</small></span><button class="subtle-link" (click)="selectSection('members')">View <span>→</span></button></div>
-                  <div class="health-note"><span class="status-dot"></span><span>Your workspace is connected and up to date.</span></div>
+                  <div class="panel-heading">
+                    <div>
+                      <h2>Workspace health</h2>
+                      <p>Everything in one place</p>
+                    </div>
+                    <span class="health-indicator">LIVE</span>
+                  </div>
+                  <div class="health-row">
+                    <span class="health-symbol">◈</span
+                    ><span
+                      ><strong>{{ subscription()?.plan | titlecase }}</strong
+                      ><small>Current plan</small></span
+                    ><button class="subtle-link" (click)="selectSection('billing')">
+                      Manage <span>→</span>
+                    </button>
+                  </div>
+                  <div class="health-row">
+                    <span class="health-symbol green-symbol">♧</span
+                    ><span
+                      ><strong>{{ organization()?.memberCount ?? 0 }} members</strong
+                      ><small>Active in this workspace</small></span
+                    ><button class="subtle-link" (click)="selectSection('members')">
+                      View <span>→</span>
+                    </button>
+                  </div>
+                  <div class="health-note">
+                    <span class="status-dot"></span
+                    ><span>Your workspace is connected and up to date.</span>
+                  </div>
                 </article>
               </section>
-              <section class="bottom-strip"><div><span class="bottom-icon">✳</span><span><strong>A little more clarity goes a long way.</strong><small>Invite your team to see the full picture together.</small></span></div><button class="subtle-link" (click)="selectSection('members')">Invite teammates <span>→</span></button></section>
+              <section class="bottom-strip">
+                <div>
+                  <span class="bottom-icon">✳</span
+                  ><span
+                    ><strong>A little more clarity goes a long way.</strong
+                    ><small>Invite your team to see the full picture together.</small></span
+                  >
+                </div>
+                <button class="subtle-link" (click)="selectSection('members')">
+                  Invite teammates <span>→</span>
+                </button>
+              </section>
             } @else if (!busy()) {
-              <div class="empty-state"><span class="empty-graphic">◫</span><h2>Metrics are getting ready</h2><p>We couldn't load your growth overview. Refresh to try again.</p><button class="button button-outline" (click)="loadSection('overview')">Try again</button></div>
+              <div class="empty-state">
+                <span class="empty-graphic">◫</span>
+                <h2>Metrics are getting ready</h2>
+                <p>We couldn't load your growth overview. Refresh to try again.</p>
+                <button class="button button-outline" (click)="loadSection('overview')">
+                  Try again
+                </button>
+              </div>
             }
           }
 
           @if (activeSection() === 'members') {
-            <section class="page-heading"><div><span class="eyebrow">YOUR PEOPLE</span><h1>Members</h1><p>Manage the people who have access to your workspace.</p></div><span class="count-pill">{{ members().length }} people</span></section>
+            <section class="page-heading">
+              <div>
+                <span class="eyebrow">YOUR PEOPLE</span>
+                <h1>Members</h1>
+                <p>Manage the people who have access to your workspace.</p>
+              </div>
+              <span class="count-pill">{{ members().length }} people</span>
+            </section>
             @if (canManageMembers()) {
               <section class="panel invite-panel">
-                <div><span class="invite-icon">＋</span><span><h2>Invite a teammate</h2><p>Bring the right people into the conversation.</p></span></div>
+                <div>
+                  <span class="invite-icon">＋</span
+                  ><span
+                    ><h2>Invite a teammate</h2>
+                    <p>Bring the right people into the conversation.</p></span
+                  >
+                </div>
                 <form class="invite-form" (ngSubmit)="inviteMember()">
-                  <label class="visually-hidden" for="invite-email">Teammate email address</label><input id="invite-email" name="inviteEmail" type="email" placeholder="name@company.com" [(ngModel)]="inviteEmail" required />
-                  <label class="visually-hidden" for="invite-role">Workspace role</label><select id="invite-role" name="inviteRole" [(ngModel)]="inviteRole"><option value="VIEWER">Viewer</option>@if (admin()) { <option value="MANAGER">Manager</option><option value="ADMIN">Admin</option> }</select>
-                  <button class="button button-primary" type="submit" [disabled]="busy() || !inviteEmail">Send invite <span aria-hidden="true">→</span></button>
+                  <label class="visually-hidden" for="invite-email">Teammate email address</label
+                  ><input
+                    id="invite-email"
+                    name="inviteEmail"
+                    type="email"
+                    placeholder="name@company.com"
+                    [(ngModel)]="inviteEmail"
+                    required
+                  />
+                  <label class="visually-hidden" for="invite-role">Workspace role</label
+                  ><select id="invite-role" name="inviteRole" [(ngModel)]="inviteRole">
+                    <option value="VIEWER">Viewer</option>
+                    @if (admin()) {
+                      <option value="MANAGER">Manager</option>
+                      <option value="ADMIN">Admin</option>
+                    }
+                  </select>
+                  <button
+                    class="button button-primary"
+                    type="submit"
+                    [disabled]="busy() || !inviteEmail"
+                  >
+                    Send invite <span aria-hidden="true">→</span>
+                  </button>
                 </form>
               </section>
             }
-            <section class="panel table-panel"><div class="panel-heading table-heading"><div><h2>Workspace members</h2><p>People with access to this workspace</p></div><button class="button button-quiet" (click)="loadSection('members')">↻ Refresh</button></div>
-              <div class="table-scroll"><table><thead><tr><th>MEMBER</th><th>ROLE</th><th>JOINED</th><th><span class="visually-hidden">Actions</span></th></tr></thead><tbody>
-                @for (member of members(); track member.id) {
-                  <tr><td><div class="member-cell"><span class="avatar member-avatar">{{ memberInitials(member.name) }}</span><span><strong>{{ member.name }}</strong><small>{{ member.email }}</small></span></div></td>
-                    <td>@if (admin()) { <select class="role-select" [ngModel]="member.role" (ngModelChange)="changeRole(member, $event)" [attr.aria-label]="'Role for ' + member.name"><option value="ADMIN">Admin</option><option value="MANAGER">Manager</option><option value="VIEWER">Viewer</option></select> } @else { <span class="role-badge">{{ member.role | titlecase }}</span> }</td>
-                    <td class="date-cell">{{ formatDate(member.joinedAt) }}</td><td class="row-actions">@if (admin() && member.id !== session()?.user.id) { <button class="icon-button remove-button" (click)="removeMember(member)" [attr.aria-label]="'Remove ' + member.name">×</button> }</td></tr>
-                } @empty { <tr><td colspan="4"><div class="table-empty">No members yet. Invite your team to get started.</div></td></tr> }
-              </tbody></table></div>
+            <section class="panel table-panel">
+              <div class="panel-heading table-heading">
+                <div>
+                  <h2>Workspace members</h2>
+                  <p>People with access to this workspace</p>
+                </div>
+                <button class="button button-quiet" (click)="loadSection('members')">
+                  ↻ Refresh
+                </button>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>MEMBER</th>
+                      <th>ROLE</th>
+                      <th>JOINED</th>
+                      <th><span class="visually-hidden">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (member of members(); track member.id) {
+                      <tr>
+                        <td>
+                          <div class="member-cell">
+                            <span class="avatar member-avatar">{{
+                              memberInitials(member.name)
+                            }}</span
+                            ><span
+                              ><strong>{{ member.name }}</strong
+                              ><small>{{ member.email }}</small></span
+                            >
+                          </div>
+                        </td>
+                        <td>
+                          @if (admin()) {
+                            <select
+                              class="role-select"
+                              [ngModel]="member.role"
+                              (ngModelChange)="changeRole(member, $event)"
+                              [attr.aria-label]="'Role for ' + member.name"
+                            >
+                              <option value="ADMIN">Admin</option>
+                              <option value="MANAGER">Manager</option>
+                              <option value="VIEWER">Viewer</option>
+                            </select>
+                          } @else {
+                            <span class="role-badge">{{ member.role | titlecase }}</span>
+                          }
+                        </td>
+                        <td class="date-cell">{{ formatDate(member.joinedAt) }}</td>
+                        <td class="row-actions">
+                          @if (admin() && member.id !== session()?.user.id) {
+                            <button
+                              class="icon-button remove-button"
+                              (click)="removeMember(member)"
+                              [attr.aria-label]="'Remove ' + member.name"
+                            >
+                              ×
+                            </button>
+                          }
+                        </td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="4">
+                          <div class="table-empty">
+                            No members yet. Invite your team to get started.
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
             </section>
             @if (canManageMembers()) {
-              <section class="panel table-panel pending-panel"><div class="panel-heading table-heading"><div><h2>Pending invitations</h2><p>Invites that have not been accepted yet</p></div><span class="count-pill">{{ invitations().length }} pending</span></div><div class="table-scroll"><table><thead><tr><th>EMAIL</th><th>ROLE</th><th>EXPIRES</th><th><span class="visually-hidden">Actions</span></th></tr></thead><tbody>
-                @for (invitation of invitations(); track invitation._id) { <tr><td><strong>{{ invitation.email }}</strong></td><td><span class="role-badge">{{ invitation.role | titlecase }}</span></td><td class="date-cell">{{ formatDate(invitation.expiresAt) }}</td><td class="row-actions"><button class="icon-button remove-button" (click)="revokeInvitation(invitation)" [attr.aria-label]="'Revoke invitation for ' + invitation.email">×</button></td></tr> }
-                @empty { <tr><td colspan="4"><div class="table-empty">No pending invitations.</div></td></tr> }
-              </tbody></table></div></section>
+              <section class="panel table-panel pending-panel">
+                <div class="panel-heading table-heading">
+                  <div>
+                    <h2>Pending invitations</h2>
+                    <p>Invites that have not been accepted yet</p>
+                  </div>
+                  <span class="count-pill">{{ invitations().length }} pending</span>
+                </div>
+                <div class="table-scroll">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>EMAIL</th>
+                        <th>ROLE</th>
+                        <th>EXPIRES</th>
+                        <th><span class="visually-hidden">Actions</span></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (invitation of invitations(); track invitation._id) {
+                        <tr>
+                          <td>
+                            <strong>{{ invitation.email }}</strong>
+                          </td>
+                          <td>
+                            <span class="role-badge">{{ invitation.role | titlecase }}</span>
+                          </td>
+                          <td class="date-cell">{{ formatDate(invitation.expiresAt) }}</td>
+                          <td class="row-actions">
+                            <button
+                              class="icon-button remove-button"
+                              (click)="revokeInvitation(invitation)"
+                              [attr.aria-label]="'Revoke invitation for ' + invitation.email"
+                            >
+                              ×
+                            </button>
+                          </td>
+                        </tr>
+                      } @empty {
+                        <tr>
+                          <td colspan="4">
+                            <div class="table-empty">No pending invitations.</div>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </section>
             }
           }
 
           @if (activeSection() === 'billing') {
-            <section class="page-heading"><div><span class="eyebrow">SUBSCRIPTION & PAYMENTS</span><h1>Billing</h1><p>Manage your plan and keep your workspace running.</p></div></section>
-            <section class="panel current-plan"><div class="plan-intro"><span class="current-plan-icon">◈</span><span><span class="eyebrow">CURRENT PLAN</span><h2>{{ subscription()?.plan | titlecase }}</h2><p>Your subscription is {{ subscription()?.status ?? 'inactive' }}.</p></span></div><div class="plan-value"><strong>{{ formatMoney((subscription()?.amountCents ?? 0) / 100, subscription()?.currency) }}<small>/ month</small></strong>@if (subscription()?.currentPeriodEnd) { <span>Renews {{ formatDate(subscription()?.currentPeriodEnd!) }}</span> }</div><button class="button button-outline" (click)="openBillingPortal()">Manage subscription <span aria-hidden="true">↗</span></button></section>
-            <div class="section-title"><div><h2>Choose a plan</h2><p>All plans are securely managed through Stripe.</p></div></div>
+            <section class="page-heading">
+              <div>
+                <span class="eyebrow">SUBSCRIPTION & PAYMENTS</span>
+                <h1>Billing</h1>
+                <p>Manage your plan and keep your workspace running.</p>
+              </div>
+            </section>
+            <section class="panel current-plan">
+              <div class="plan-intro">
+                <span class="current-plan-icon">◈</span
+                ><span
+                  ><span class="eyebrow">CURRENT PLAN</span>
+                  <h2>{{ subscription()?.plan | titlecase }}</h2>
+                  <p>Your subscription is {{ subscription()?.status ?? 'inactive' }}.</p></span
+                >
+              </div>
+              <div class="plan-value">
+                <strong
+                  >{{
+                    formatMoney((subscription()?.amountCents ?? 0) / 100, subscription()?.currency)
+                  }}<small>/ month</small></strong
+                >
+                @if (subscription()?.currentPeriodEnd) {
+                  <span>Renews {{ formatDate(subscription()?.currentPeriodEnd!) }}</span>
+                }
+              </div>
+              <button class="button button-outline" (click)="openBillingPortal()">
+                Manage subscription <span aria-hidden="true">↗</span>
+              </button>
+            </section>
+            <div class="section-title">
+              <div>
+                <h2>Choose a plan</h2>
+                <p>All plans are securely managed through Stripe.</p>
+              </div>
+            </div>
             <section class="plan-grid">
               @for (plan of plans(); track plan.key) {
-                <article class="panel plan-card" [class.plan-featured]="plan.key === 'growth'"><span class="plan-label">{{ plan.name }}</span><h3>{{ plan.tagline ?? (plan.key === 'starter' ? 'The essentials.' : plan.key === 'growth' ? 'Room to grow.' : 'Built for scale.') }}</h3><p>Clear insights and tools for your next stage.</p><ul>@for (feature of plan.features; track feature) { <li><span>✓</span>{{ feature }}</li> }</ul>@if (plan.amountCents) { <div class="plan-price"><strong>{{ formatMoney(plan.amountCents / 100, plan.currency) }}<small>/ {{ plan.interval ?? 'month' }}</small></strong></div> }<button class="button" [class.button-primary]="plan.key === 'growth'" [class.button-outline]="plan.key !== 'growth'" (click)="choosePlan(plan)" [disabled]="!plan.available || busy()">{{ plan.available ? 'Continue with ' + plan.name : 'Price not configured' }}</button></article>
+                <article class="panel plan-card" [class.plan-featured]="plan.key === 'growth'">
+                  <span class="plan-label">{{ plan.name }}</span>
+                  <h3>
+                    {{
+                      plan.tagline ??
+                        (plan.key === 'starter'
+                          ? 'The essentials.'
+                          : plan.key === 'growth'
+                            ? 'Room to grow.'
+                            : 'Built for scale.')
+                    }}
+                  </h3>
+                  <p>Clear insights and tools for your next stage.</p>
+                  <ul>
+                    @for (feature of plan.features; track feature) {
+                      <li><span>✓</span>{{ feature }}</li>
+                    }
+                  </ul>
+                  @if (plan.amountCents) {
+                    <div class="plan-price">
+                      <strong
+                        >{{ formatMoney(plan.amountCents / 100, plan.currency)
+                        }}<small>/ {{ plan.interval ?? 'month' }}</small></strong
+                      >
+                    </div>
+                  }
+                  <button
+                    class="button"
+                    [class.button-primary]="plan.key === 'growth'"
+                    [class.button-outline]="plan.key !== 'growth'"
+                    (click)="choosePlan(plan)"
+                    [disabled]="!plan.available || busy()"
+                  >
+                    {{ plan.available ? 'Continue with ' + plan.name : 'Price not configured' }}
+                  </button>
+                </article>
               }
             </section>
           }
 
           @if (activeSection() === 'audit') {
-            <section class="page-heading"><div><span class="eyebrow">WORKSPACE ACTIVITY</span><h1>Audit log</h1><p>A record of important changes made in your workspace.</p></div><button class="button button-quiet" (click)="loadSection('audit')">↻ Refresh</button></section>
-            <section class="panel table-panel"><div class="panel-heading table-heading"><div><h2>Recent activity</h2><p>Admin and billing events, newest first</p></div><span class="count-pill">{{ auditLogs().length }} events</span></div><div class="table-scroll"><table><thead><tr><th>EVENT</th><th>ACTOR</th><th>DETAIL</th><th>DATE</th></tr></thead><tbody>
-              @for (log of auditLogs(); track log._id) { <tr><td><span class="event-dot"></span><strong>{{ log.action.replace('.', ' · ') }}</strong></td><td>{{ log.actorId?.name ?? 'System' }}</td><td class="detail-cell">{{ log.targetType }}{{ log.targetId ? ' · ' + log.targetId : '' }}</td><td class="date-cell">{{ formatDate(log.createdAt) }}</td></tr> }
-              @empty { <tr><td colspan="4"><div class="table-empty">No audit events have been recorded yet.</div></td></tr> }
-            </tbody></table></div></section>
+            <section class="page-heading">
+              <div>
+                <span class="eyebrow">WORKSPACE ACTIVITY</span>
+                <h1>Audit log</h1>
+                <p>A record of important changes made in your workspace.</p>
+              </div>
+              <button class="button button-quiet" (click)="loadSection('audit')">↻ Refresh</button>
+            </section>
+            <section class="panel table-panel">
+              <div class="panel-heading table-heading">
+                <div>
+                  <h2>Recent activity</h2>
+                  <p>Admin and billing events, newest first</p>
+                </div>
+                <span class="count-pill">{{ auditLogs().length }} events</span>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>EVENT</th>
+                      <th>ACTOR</th>
+                      <th>DETAIL</th>
+                      <th>DATE</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (log of auditLogs(); track log._id) {
+                      <tr>
+                        <td>
+                          <span class="event-dot"></span
+                          ><strong>{{ log.action.replace('.', ' · ') }}</strong>
+                        </td>
+                        <td>{{ log.actorId?.name ?? 'System' }}</td>
+                        <td class="detail-cell">
+                          {{ log.targetType }}{{ log.targetId ? ' · ' + log.targetId : '' }}
+                        </td>
+                        <td class="date-cell">{{ formatDate(log.createdAt) }}</td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="4">
+                          <div class="table-empty">No audit events have been recorded yet.</div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </section>
           }
 
           @if (activeSection() === 'settings') {
-            <section class="page-heading"><div><span class="eyebrow">WORKSPACE PREFERENCES</span><h1>Settings</h1><p>Keep your workspace details up to date.</p></div></section>
-            <section class="panel settings-panel"><div class="panel-heading"><div><h2>General</h2><p>Update the details people see about this workspace.</p></div></div><form (ngSubmit)="saveOrganization()"><label for="setting-workspace-name">Workspace name</label><input id="setting-workspace-name" name="workspaceName" [(ngModel)]="organizationNameInput" required maxlength="120" [disabled]="!admin()" /><span class="field-hint">This name is visible to members of your workspace.</span><label>Workspace ID</label><code>{{ organization()?.slug }}</code><div class="settings-footer">@if (!admin()) { <span class="muted">Only an admin can change workspace details.</span> } @else { <button class="button button-primary" type="submit" [disabled]="busy()">Save changes</button> }</div></form></section>
-            <section class="panel account-panel"><div><h2>Your account</h2><p>{{ session()?.user.email }}</p></div><button class="button button-outline" (click)="signOut()">Sign out</button></section>
+            <section class="page-heading">
+              <div>
+                <span class="eyebrow">WORKSPACE PREFERENCES</span>
+                <h1>Settings</h1>
+                <p>Keep your workspace details up to date.</p>
+              </div>
+            </section>
+            <section class="panel settings-panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>General</h2>
+                  <p>Update the details people see about this workspace.</p>
+                </div>
+              </div>
+              <form (ngSubmit)="saveOrganization()">
+                <label for="setting-workspace-name">Workspace name</label
+                ><input
+                  id="setting-workspace-name"
+                  name="workspaceName"
+                  [(ngModel)]="organizationNameInput"
+                  required
+                  maxlength="120"
+                  [disabled]="!admin()"
+                /><span class="field-hint">This name is visible to members of your workspace.</span
+                ><label>Workspace ID</label><code>{{ organization()?.slug }}</code>
+                <div class="settings-footer">
+                  @if (!admin()) {
+                    <span class="muted">Only an admin can change workspace details.</span>
+                  } @else {
+                    <button class="button button-primary" type="submit" [disabled]="busy()">
+                      Save changes
+                    </button>
+                  }
+                </div>
+              </form>
+            </section>
+            <section class="panel account-panel">
+              <div>
+                <h2>Your account</h2>
+                <p>{{ session()?.user.email }}</p>
+              </div>
+              <button class="button button-outline" (click)="signOut()">Sign out</button>
+            </section>
           }
-          <footer class="page-footer"><span>© 2026 Northstar</span><span><a href="#privacy">Privacy</a><a href="#terms">Terms</a><span class="footer-version">Made for clear decisions</span></span></footer>
+          <footer class="page-footer">
+            <span>© 2026 Northstar</span
+            ><span
+              ><a href="#privacy">Privacy</a><a href="#terms">Terms</a
+              ><span class="footer-version">Made for clear decisions</span></span
+            >
+          </footer>
         </main>
       </section>
     </div>

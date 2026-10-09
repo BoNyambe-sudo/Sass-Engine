@@ -21,6 +21,7 @@ client is an Angular 22 standalone application.
    repository root. This supports running it from either the workspace root or
    the `backend` package directory; deployment environments can provide the
    same values as process environment variables.
+
 2. Install the pinned workspace dependencies:
 
    ```sh

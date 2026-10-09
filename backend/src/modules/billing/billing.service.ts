@@ -56,7 +56,8 @@ export class BillingService {
   private getStripe(): Stripe {
     if (!this.stripe) {
       const key = process.env.STRIPE_SECRET_KEY;
-      if (!key) throw new ServiceUnavailableException('Stripe is not configured');
+      if (!key)
+        throw new ServiceUnavailableException('Stripe is not configured');
       this.stripe = new Stripe(key);
     }
     return this.stripe;
@@ -66,7 +67,9 @@ export class BillingService {
     if (this.plansCache) return this.plansCache;
 
     const stripe = this.getStripe();
-    const priceIds = PLAN_KEYS.map((key) => process.env[`STRIPE_PRICE_${key.toUpperCase()}`]).filter(Boolean) as string[];
+    const priceIds = PLAN_KEYS.map(
+      (key) => process.env[`STRIPE_PRICE_${key.toUpperCase()}`],
+    ).filter(Boolean) as string[];
 
     const plans = await Promise.all(
       PLAN_KEYS.map(async (key) => {
@@ -93,8 +96,11 @@ export class BillingService {
             interval: price.recurring?.interval,
           };
         } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          this.logger.warn(`Failed to retrieve Stripe price for ${key}: ${message}`);
+          const message =
+            error instanceof Error ? error.message : String(error);
+          this.logger.warn(
+            `Failed to retrieve Stripe price for ${key}: ${message}`,
+          );
           return basePlan;
         }
       }),

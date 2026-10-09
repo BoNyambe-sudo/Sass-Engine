@@ -13,7 +13,9 @@ export class EmailService {
   constructor() {
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
-      this.logger.warn('RESEND_API_KEY not set - emails will only log in development');
+      this.logger.warn(
+        'RESEND_API_KEY not set - emails will only log in development',
+      );
     }
     this.resend = new Resend(apiKey ?? 'placeholder');
   }

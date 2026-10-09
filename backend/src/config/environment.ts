@@ -71,8 +71,7 @@ const environmentSchema = z
     }
     if (
       environment.NODE_ENV === 'production' &&
-      (!environment.STRIPE_SECRET_KEY ||
-        !environment.STRIPE_WEBHOOK_SECRET)
+      (!environment.STRIPE_SECRET_KEY || !environment.STRIPE_WEBHOOK_SECRET)
     ) {
       context.addIssue({
         code: 'custom',
