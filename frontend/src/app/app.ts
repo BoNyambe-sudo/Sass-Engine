@@ -116,6 +116,9 @@ export class App implements OnInit {
     const verificationToken = hash.get('verify');
     this.resetToken = hash.get('reset') ?? '';
     this.invitationToken = hash.get('invite') ?? '';
+    const path = globalThis.location.pathname;
+    const isBillingSuccess = path.includes('/billing/success');
+    const isBillingCancel = path.includes('/billing/cancel');
     if (this.resetToken) this.authMode.set('reset');
     if (this.invitationToken) this.authMode.set('invite');
     if (verificationToken) {
@@ -127,6 +130,14 @@ export class App implements OnInit {
       } finally {
         globalThis.history.replaceState(null, '', globalThis.location.pathname);
       }
+    }
+    if (isBillingSuccess) {
+      this.notice.set('Subscription updated successfully!');
+      globalThis.history.replaceState(null, '', globalThis.location.pathname.replace('/billing/success', ''));
+    }
+    if (isBillingCancel) {
+      this.error.set('Checkout was canceled.');
+      globalThis.history.replaceState(null, '', globalThis.location.pathname.replace('/billing/cancel', ''));
     }
     if (this.resetToken || this.invitationToken) {
       this.api.clearSession();
@@ -243,12 +254,16 @@ export class App implements OnInit {
   async loadSection(section: Section): Promise<void> {
     const jobs: Record<Section, () => Promise<void>> = {
       overview: async () => {
-        this.overview.set(await this.api.get<MetricOverview>('analytics/overview'));
-        this.organization.set(
-          await this.api.get<{ id: string; name: string; slug: string; memberCount: number }>(
+        const [overviewData, orgData, subData] = await Promise.all([
+          this.api.get<MetricOverview>('analytics/overview'),
+          this.api.get<{ id: string; name: string; slug: string; memberCount: number }>(
             'organizations/current',
           ),
-        );
+          this.api.get<SubscriptionState>('billing/subscription'),
+        ]);
+        this.overview.set(overviewData);
+        this.organization.set(orgData);
+        this.subscription.set(subData);
       },
       members: async () => {
         const [result, invitations] = await Promise.all([
