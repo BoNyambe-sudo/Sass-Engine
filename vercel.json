@@ -1,7 +1,6 @@
 {
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm --filter @saas-growth-engine/frontend build",
-  "outputDirectory": "frontend/dist/frontend/browser",
   "rewrites": [
     {
       "source": "/api/:path*",
